@@ -31,31 +31,55 @@
  */
 
 import { StateCreator } from 'zustand';
-import { DataFormat, LineEnding } from '../../types';
+import { DataFormat, InputFormat, LineEnding } from '../../types';
 
 export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | null;
+
+export interface LogEntry {
+  timestamp: number;
+  direction: 'rx' | 'tx';
+  data: number[]; // Store as number[] to avoid Uint8Array serialization issues
+}
 
 export interface UiSlice {
   activeModal: ModalType;
   dataFormat: DataFormat;
+  inputFormat: InputFormat;
   lineEnding: LineEnding;
   showDocumentation: boolean;
+  dataLog: LogEntry[];
+  
   setActiveModal: (modal: ModalType) => void;
   setDataFormat: (format: DataFormat) => void;
+  setInputFormat: (format: InputFormat) => void;
   setLineEnding: (ending: LineEnding) => void;
   setShowDocumentation: (show: boolean) => void;
+  appendLog: (entry: LogEntry) => void;
+  clearLog: () => void;
 }
 
 export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   activeModal: null,
   dataFormat: 'ASCII',
+  inputFormat: 'ASCII',
   lineEnding: 'None',
   showDocumentation: true,
+  dataLog: [],
+
   setActiveModal: (activeModal) => set({ activeModal }),
   setDataFormat: (dataFormat) => set({ dataFormat }),
+  setInputFormat: (inputFormat) => set({ inputFormat }),
   setLineEnding: (lineEnding) => set({ lineEnding }),
   setShowDocumentation: (showDocumentation) => set({ showDocumentation }),
+  
+  appendLog: (entry) => set((state) => {
+    // Limit log size to prevent performance issues
+    const newLog = [...state.dataLog, entry];
+    if (newLog.length > 1000) {
+      return { dataLog: newLog.slice(-1000) };
+    }
+    return { dataLog: newLog };
+  }),
+  
+  clearLog: () => set({ dataLog: [] }),
 });
-
-
-

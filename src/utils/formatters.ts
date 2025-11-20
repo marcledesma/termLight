@@ -30,18 +30,84 @@
  * @date 2025-11-19
  */
 
-// Placeholder for data formatting functions (ASCII, HEX, DEC, BIN conversions)
-export function formatDataAsHex(data: string): string {
-  return data;
+export function formatDataAsAscii(data: Uint8Array): string {
+  return new TextDecoder().decode(data);
 }
 
-export function formatDataAsDec(data: string): string {
-  return data;
+export function formatDataAsHex(data: Uint8Array): string {
+  return Array.from(data)
+    .map((byte) => byte.toString(16).padStart(2, '0').toUpperCase())
+    .join(' ');
 }
 
-export function formatDataAsBin(data: string): string {
-  return data;
+export function formatDataAsDec(data: Uint8Array): string {
+  return Array.from(data)
+    .map((byte) => byte.toString(10))
+    .join(' ');
 }
 
+export function formatDataAsBin(data: Uint8Array): string {
+  return Array.from(data)
+    .map((byte) => byte.toString(2).padStart(8, '0'))
+    .join(' ');
+}
 
+// Input Parsers
 
+export function parseAsciiInput(input: string): Uint8Array {
+  return new TextEncoder().encode(input);
+}
+
+export function parseHexInput(input: string): Uint8Array {
+  // Remove non-hex characters (except spaces to keep separation if needed, but standard hex parsers usually ignore all non-hex)
+  // However, to be safe, let's just strip everything that isn't 0-9, a-f, A-F
+  const cleanInput = input.replace(/[^0-9a-fA-F]/g, '');
+  if (cleanInput.length % 2 !== 0) {
+    // If odd length, pad with leading zero? Or throw error?
+    // Docklight usually ignores invalid input or treats nibbles. 
+    // Let's pad with leading zero if odd length to be safe, or just warn.
+    // We'll return empty if invalid or just try to parse what we have.
+  }
+  
+  const bytes: number[] = [];
+  for (let i = 0; i < cleanInput.length; i += 2) {
+    // If we have an odd number of chars at the end, take the last one as a lower nibble or full byte? 
+    // Usually parsers treat "F" as "0F".
+    const chunk = cleanInput.substring(i, i + 2);
+    bytes.push(parseInt(chunk, 16));
+  }
+  return new Uint8Array(bytes);
+}
+
+export function parseDecInput(input: string): Uint8Array {
+  // Expect space or comma separated decimal numbers
+  const parts = input.split(/[\s,]+/);
+  const bytes: number[] = [];
+  
+  for (const part of parts) {
+    if (!part) continue;
+    const val = parseInt(part, 10);
+    if (!isNaN(val) && val >= 0 && val <= 255) {
+      bytes.push(val);
+    }
+  }
+  return new Uint8Array(bytes);
+}
+
+export function parseBinInput(input: string): Uint8Array {
+  // Expect space or comma separated binary strings (8 bits usually, but can be varying)
+  // Or just a stream of 0s and 1s.
+  // Let's assume space separated for clarity, or stream.
+  // If stream, we take 8 bits at a time.
+  
+  const cleanInput = input.replace(/[^01]/g, '');
+  const bytes: number[] = [];
+  
+  for (let i = 0; i < cleanInput.length; i += 8) {
+    const chunk = cleanInput.substring(i, Math.min(i + 8, cleanInput.length));
+    // If chunk is < 8 bits, it's the MSB part? Or just parse it.
+    // Usually "1" -> 1, "10" -> 2.
+    bytes.push(parseInt(chunk, 2));
+  }
+  return new Uint8Array(bytes);
+}

@@ -1,0 +1,33 @@
+"$schema" = "../gen/schemas/desktop-schema.json"
+
+[[permission]]
+identifier = "allow-list-ports"
+description = "Allows listing available serial ports"
+commands.allow = ["list_ports"]
+
+[[permission]]
+identifier = "allow-open-port"
+description = "Allows opening a serial port"
+commands.allow = ["open_port"]
+
+[[permission]]
+identifier = "allow-close-port"
+description = "Allows closing a serial port"
+commands.allow = ["close_port"]
+
+[[permission]]
+identifier = "allow-send-data"
+description = "Allows sending data to a serial port"
+commands.allow = ["send_data"]
+
+[[set]]
+identifier = "allow-serial-commands"
+description = "Allows all serial port commands"
+permissions = [
+  "allow-list-ports",
+  "allow-open-port",
+  "allow-close-port",
+  "allow-send-data"
+]
+
+

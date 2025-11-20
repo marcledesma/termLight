@@ -31,45 +31,129 @@
  */
 
 import { useState } from 'react';
-import { Send } from 'lucide-react';
-import { Button } from '../Common/Button';
-import { Dropdown } from '../Common/Dropdown';
+import { SplitButton } from '../Common/SplitButton';
 import { useStore } from '../../store';
+import { parseAsciiInput, parseHexInput, parseDecInput, parseBinInput } from '../../utils/formatters';
+import { InputFormat } from '../../types';
 
 export function CommandInput() {
   const [inputValue, setInputValue] = useState('');
-  const { lineEnding, setLineEnding, isConnected } = useStore();
+  const { 
+    lineEnding, 
+    setLineEnding, 
+    isConnected, 
+    sendSerialData, 
+    appendLog,
+    inputFormat,
+    setInputFormat 
+  } = useStore();
+
+  const handleSend = async () => {
+    if (!inputValue) return;
+
+    let dataToSend: Uint8Array;
+    
+    try {
+      switch (inputFormat) {
+        case 'HEX':
+          dataToSend = parseHexInput(inputValue);
+          break;
+        case 'DEC':
+          dataToSend = parseDecInput(inputValue);
+          break;
+        case 'BIN':
+          dataToSend = parseBinInput(inputValue);
+          break;
+        case 'ASCII':
+        default:
+          // For ASCII, we might append line endings
+          let text = inputValue;
+          if (lineEnding === 'NL') text += '\n';
+          else if (lineEnding === 'CR') text += '\r';
+          else if (lineEnding === 'Both') text += '\r\n';
+          dataToSend = parseAsciiInput(text);
+          break;
+      }
+
+      if (dataToSend.length === 0) {
+        return;
+      }
+
+      await sendSerialData(dataToSend);
+      
+      appendLog({
+        timestamp: Date.now(),
+        direction: 'tx',
+        data: Array.from(dataToSend), // Convert Uint8Array to regular array for storage
+      });
+      
+      setInputValue('');
+    } catch (error) {
+      console.error("Error parsing input:", error);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   return (
-    <div className="flex items-center gap-2 p-2 border-t border-gray-300 bg-gray-50">
-      <input
-        type="text"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Enter command..."
-        disabled={!isConnected}
-        className="flex-1 px-3 py-2 border border-gray-300 rounded font-mono text-sm
-                 focus:outline-none focus:ring-2 focus:ring-blue-500
-                 disabled:bg-gray-100 disabled:cursor-not-allowed"
-      />
-      <Dropdown
-        value={lineEnding}
-        onChange={(e) => setLineEnding(e.target.value as any)}
-        className="w-32 text-xs"
-        disabled={!isConnected}
-      >
-        <option value="None">No Line Ending</option>
-        <option value="NL">New Line</option>
-        <option value="CR">Carriage Return</option>
-        <option value="Both">Both NL & CR</option>
-      </Dropdown>
-      <Button disabled={!isConnected || !inputValue}>
-        <Send size={16} className="mr-1" />
-        Send
-      </Button>
+    <div className="p-3 border-t border-gray-300 bg-gray-50 flex flex-col gap-1">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-xs font-medium text-gray-500">Input ({inputFormat})</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              isConnected 
+                ? inputFormat === 'ASCII' 
+                  ? "Enter text..." 
+                  : `Enter ${inputFormat} values...`
+                : "Connect to send commands"
+            }
+            disabled={!isConnected}
+            className="w-full h-11 px-3 py-2 border border-gray-300 rounded-md font-mono text-sm
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     disabled:bg-gray-100 disabled:cursor-not-allowed"
+          />
+          
+          {/* Embedded Line Ending Selector for ASCII */}
+          {inputFormat === 'ASCII' && (
+            <div className="absolute right-1 top-1 bottom-1 flex items-center bg-white">
+              <div className="h-6 w-px bg-gray-300 mx-2"></div>
+              <select
+                value={lineEnding}
+                onChange={(e) => setLineEnding(e.target.value as any)}
+                disabled={!isConnected}
+                className="h-full border-none bg-transparent text-xs text-gray-600 font-medium focus:ring-0 cursor-pointer hover:text-gray-900 pr-8"
+              >
+                <option value="None">No Line Ending</option>
+                <option value="NL">New Line (NL)</option>
+                <option value="CR">Carriage Return (CR)</option>
+                <option value="Both">Both (NL & CR)</option>
+              </select>
+            </div>
+          )}
+        </div>
+
+        <SplitButton 
+          onClick={handleSend}
+          onOptionSelect={(opt) => setInputFormat(opt as InputFormat)}
+          options={['ASCII', 'HEX', 'DEC', 'BIN']}
+          selectedOption={inputFormat}
+          disabled={!isConnected || !inputValue}
+          className="h-11"
+        />
+      </div>
     </div>
   );
 }
-
-
-

@@ -25,29 +25,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
- * @file main.rs
+ * @file state.rs
  * @author Marc Ledesma
  * @date 2025-11-19
  */
 
-// Prevents additional console window on Windows in release mode
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use serialport::SerialPort;
+use std::sync::Mutex;
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 
-mod commands;
-mod serial;
+pub struct SerialState {
+    pub port: Mutex<Option<Box<dyn SerialPort>>>,
+    pub is_connected: AtomicBool,
+    pub should_stop: Arc<AtomicBool>,
+}
 
-use serial::state::SerialState;
-
-fn main() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
-        .manage(SerialState::new())
-        .invoke_handler(tauri::generate_handler![
-            commands::serial::list_ports,
-            commands::serial::open_port,
-            commands::serial::close_port,
-            commands::serial::send_data,
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+impl SerialState {
+    pub fn new() -> Self {
+        Self {
+            port: Mutex::new(None),
+            is_connected: AtomicBool::new(false),
+            should_stop: Arc::new(AtomicBool::new(false)),
+        }
+    }
 }

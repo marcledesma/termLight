@@ -34,37 +34,59 @@ import { Send } from 'lucide-react';
 import { Command } from '../../types';
 import { Button } from '../Common/Button';
 import { useStore } from '../../store';
+import { parseAsciiInput } from '../../utils/formatters';
 
 interface CommandItemProps {
   command: Command;
 }
 
 export function CommandItem({ command }: CommandItemProps) {
-  const { setSelectedCommand } = useStore();
+  const { setSelectedCommand, sendSerialData, appendLog, isConnected } = useStore();
+
+  const handleSend = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent selecting the item when clicking send
+    if (!isConnected) return;
+
+    // For now, assume stored commands are ASCII
+    // In future, Command type should support formats
+    const data = parseAsciiInput(command.sequence);
+    
+    await sendSerialData(data);
+    
+    appendLog({
+      timestamp: Date.now(),
+      direction: 'tx',
+      data: Array.from(data), // Convert Uint8Array to regular array for storage
+    });
+  };
 
   return (
     <div
       className="grid grid-cols-[60px_1fr_2fr] gap-1 p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-xs"
       onClick={() => setSelectedCommand(command)}
     >
-      <Button variant="icon" size="sm" className="h-7 w-full">
+      <Button 
+        variant="icon" 
+        size="sm" 
+        className="h-7 w-full text-blue-600 hover:text-blue-800"
+        onClick={handleSend}
+        disabled={!isConnected}
+        title="Send Command"
+      >
         <Send size={14} />
       </Button>
       <input
         type="text"
         value={command.name}
         readOnly
-        className="px-2 py-1 bg-white border border-gray-300 rounded text-xs"
+        className="px-2 py-1 bg-white border border-gray-300 rounded text-xs cursor-pointer"
       />
       <input
         type="text"
         value={command.sequence}
         readOnly
-        className="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono"
+        className="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono cursor-pointer"
       />
     </div>
   );
 }
-
-
-

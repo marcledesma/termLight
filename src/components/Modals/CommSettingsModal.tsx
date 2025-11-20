@@ -30,13 +30,42 @@
  * @date 2025-11-19
  */
 
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '../Common/Button';
 import { Dropdown } from '../Common/Dropdown';
 import { useStore } from '../../store';
+import { SerialConfig } from '../../types';
 
 export function CommSettingsModal() {
-  const { setActiveModal, baudRate, parity, dataBits, stopBits } = useStore();
+  const { 
+    setActiveModal, 
+    portName, 
+    baudRate, 
+    parity, 
+    dataBits, 
+    stopBits,
+    availablePorts,
+    setSerialConfig,
+    refreshPorts 
+  } = useStore();
+
+  const [localConfig, setLocalConfig] = useState<SerialConfig>({
+    portName,
+    baudRate,
+    parity,
+    dataBits,
+    stopBits
+  });
+
+  useEffect(() => {
+    refreshPorts();
+  }, [refreshPorts]);
+
+  const handleSave = () => {
+    setSerialConfig(localConfig);
+    setActiveModal(null);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -51,14 +80,21 @@ export function CommSettingsModal() {
           </button>
         </div>
         <div className="p-6 space-y-4">
-          <Dropdown label="COM Port">
-            <option>COM1</option>
-            <option>COM2</option>
-            <option>COM3</option>
-            <option>COM4</option>
-            <option>COM5</option>
+          <Dropdown 
+            label="COM Port" 
+            value={localConfig.portName} 
+            onChange={(e) => setLocalConfig({...localConfig, portName: e.target.value})}
+          >
+            <option value="" disabled>Select a port</option>
+            {availablePorts.map(p => (
+              <option key={p.name} value={p.name}>{p.name} {p.description ? `(${p.description})` : ''}</option>
+            ))}
           </Dropdown>
-          <Dropdown label="Baud Rate" value={baudRate}>
+          <Dropdown 
+            label="Baud Rate" 
+            value={localConfig.baudRate}
+            onChange={(e) => setLocalConfig({...localConfig, baudRate: Number(e.target.value)})}
+          >
             <option value="300">300</option>
             <option value="1200">1200</option>
             <option value="2400">2400</option>
@@ -69,33 +105,42 @@ export function CommSettingsModal() {
             <option value="57600">57600</option>
             <option value="115200">115200</option>
           </Dropdown>
-          <Dropdown label="Parity" value={parity}>
-            <option>None</option>
-            <option>Even</option>
-            <option>Odd</option>
+          <Dropdown 
+            label="Parity" 
+            value={localConfig.parity}
+            onChange={(e) => setLocalConfig({...localConfig, parity: e.target.value as any})}
+          >
+            <option value="None">None</option>
+            <option value="Even">Even</option>
+            <option value="Odd">Odd</option>
           </Dropdown>
-          <Dropdown label="Data Bits" value={dataBits}>
-            <option>5</option>
-            <option>6</option>
-            <option>7</option>
-            <option>8</option>
+          <Dropdown 
+            label="Data Bits" 
+            value={localConfig.dataBits}
+            onChange={(e) => setLocalConfig({...localConfig, dataBits: Number(e.target.value) as any})}
+          >
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
           </Dropdown>
-          <Dropdown label="Stop Bits" value={stopBits}>
-            <option>1</option>
-            <option>1.5</option>
-            <option>2</option>
+          <Dropdown 
+            label="Stop Bits" 
+            value={localConfig.stopBits}
+            onChange={(e) => setLocalConfig({...localConfig, stopBits: Number(e.target.value) as any})}
+          >
+            <option value="1">1</option>
+            <option value="1.5">1.5</option>
+            <option value="2">2</option>
           </Dropdown>
         </div>
         <div className="flex justify-end gap-2 p-4 border-t">
           <Button variant="secondary" onClick={() => setActiveModal(null)}>
             Cancel
           </Button>
-          <Button onClick={() => setActiveModal(null)}>Apply</Button>
+          <Button onClick={handleSave}>Apply</Button>
         </div>
       </div>
     </div>
   );
 }
-
-
-

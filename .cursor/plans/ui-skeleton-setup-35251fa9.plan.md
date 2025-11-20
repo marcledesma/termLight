@@ -1,100 +1,72 @@
-<!-- 35251fa9-8e05-4bc9-91b9-d607768c60a9 edf05d30-c9f0-4bfe-a56e-b055b78b5d7d -->
-# Phase 2: Serial Communication Backend
+<!-- 35251fa9-8e05-4bc9-91b9-d607768c60a9 bb50b719-5bfd-4ab3-8078-5befa9d201ce -->
+# Phase 2.1: Enhanced Input & Binary Support
 
 ## Overview
 
-Implement the core serial communication functionality using Rust's `serialport` crate and Tauri's event system. This phase bridges the UI skeleton with actual hardware communication.
+The user requested a larger SEND button with format selection (ASCII, HEX, DEC, BIN). To support sending non-ASCII data (like HEX `0xFF`), the entire data transmission pipeline must be refactored to handle raw bytes (`Vec<u8>`) instead of Strings.
 
-## 1. Rust Backend Implementation
+## 1. Backend Refactor (Rust)
 
-### Dependencies
+### `src-tauri/src/commands/serial.rs`
 
-- Verify `serialport`, `serde`, `serde_json` in `src-tauri/Cargo.toml`.
-- Ensure `tauri-plugin-shell` is configured if needed (already added in Phase 1).
-
-### Serial State Management (`src-tauri/src/serial/`)
-
-- **`state.rs`**: Create a `SerialState` struct using `std::sync::Mutex` to hold the `Option<Box<dyn SerialPort>>`.
-- **`manager.rs`**: Implement the logic to:
-- Open a port non-exclusively (or exclusively as needed).
-- Spawn a thread to continuously read from the port.
-- Emit `serial-payload` events to the frontend when data is received.
-- Handle writing data to the port.
-
-### Tauri Commands (`src-tauri/src/commands/serial.rs`)
-
-- Implement `get_ports`: Returns a list of available serial ports.
-- Implement `open_port`: Accepts `port_name`, `baud_rate`, etc. Initializes the connection and starts the read thread.
-- Implement `close_port`: Closes the connection and stops the read thread.
-- Implement `write_data`: Accepts string/bytes and writes to the open port.
-- Register commands in `main.rs`.
+- Modify `send_data` command signature to accept `Vec<u8>` instead of `String`.
+- This ensures that valid hex values (e.g. `0x80`-`0xFF`) can be sent without UTF-8 encoding errors.
 
 ## 2. Frontend Service Layer
 
-### Serial Service (`src/services/serialService.ts`)
+### `src/services/serialService.ts`
 
-- Implement `listPorts()` calling `get_ports`.
-- Implement `connect(config)` calling `open_port`.
-- Implement `disconnect()` calling `close_port`.
-- Implement `send(data)` calling `write_data`.
-- Add `listenToData(callback)` using Tauri's `listen` function for `serial-payload` events.
+- Update `send` method to accept `number[]` or `Uint8Array`.
+- Ensure the Tauri `invoke` call passes the data correctly as an array of numbers (which Tauri maps to `Vec<u8>`).
 
-### Data Formatting (`src/utils/formatters.ts`)
+### `src/utils/formatters.ts`
 
-- Implement conversion functions:
-- `stringToHex`, `hexToString`
-- `stringToDecimal`, `decimalToString`
-- `stringToBinary`, `binaryToString`
-- Ensure data sent/received respects the selected format in the UI.
+- Add **Input Parsers**:
+- `parseHexInput(str) -> Uint8Array`: Parses "FF 0A" style input.
+- `parseDecInput(str) -> Uint8Array`: Parses "255 10" style input.
+- `parseBinInput(str) -> Uint8Array`: Parses "11111111 00001010" style input.
+- `parseAsciiInput(str) -> Uint8Array`: Converts string to bytes.
 
-## 3. State Management Integration
+## 3. Store Updates
 
-### Serial Slice Updates (`src/store/slices/serialSlice.ts`)
+### `src/store/slices/serialSlice.ts`
 
-- Add `refreshPorts` thunk to update `availablePorts`.
-- Add `connectPort` and `disconnectPort` thunks managing loading states and errors.
-- Add `sendSerialData` thunk.
+- Update `sendSerialData` thunk to accept `Uint8Array` instead of `string`.
 
-### UI Slice / Data Handling
+### `src/store/slices/uiSlice.ts`
 
-- Update `dataDisplay` logic to append incoming data chunks.
-- Handle "Clear Display" functionality (if not already present).
+- Add `inputFormat` state (ASCII | HEX | DEC | BIN).
+- Add action `setInputFormat`.
 
-## 4. Component Integration
+## 4. UI Enhancement
 
-### Connection Logic
+### `src/components/MainPanel/CommandInput.tsx`
 
-- **PortSelector**: Fetch ports on mount and on dropdown open.
-- **CommSettingsModal**: Pass selected config to the `connectPort` action.
-- **Toolbar/RunMenu**: "Run" calls `connectPort`, "Stop" calls `disconnectPort`.
+- **Split Button Implementation**:
+- Create a "Send" button area (larger size).
+- Create a "Dropdown Trigger" (arrow) next to it.
+- **Format Selection**:
+- Clicking the arrow reveals: ASCII (default), HEX, DEC, BIN.
+- Changing format clears/validates the current input or just changes parsing mode.
+- **Send Logic**:
+- On Send, use the active `inputFormat` to parse the text using the new formatters.
+- Handle parsing errors (e.g., invalid HEX characters) with a toast or error state.
 
-### Data Transmission
+### `src/components/CommandPanel/CommandItem.tsx`
 
-- **CommandInput**: Validate input based on selected mode (e.g., only hex chars in HEX mode) and call `sendSerialData`.
-- **CommandItem**: "Send" button triggers `sendSerialData` with the command's sequence.
+- Update to convert the command's sequence string to bytes before calling `sendSerialData`. (Assuming commands are stored as strings; might need to decide if commands save their format too, but for now assume ASCII for stored commands or auto-detect).
 
-### Data Reception
+## 5. Testing
 
-- **MainPanel/DataDisplay**: Subscribe to the store's data stream and render it according to the selected format (ASCII/HEX/etc.).
-
-## 5. Error Handling & Polish
-
-- Add toast notifications or status bar messages for:
-- Connection success/failure.
-- Port disconnected unexpectedly.
-- Write errors.
-- ensure resources are cleaned up (port closed) when the app exits.
+- Verify sending ASCII "A" works.
+- Verify sending HEX "FF" works (and doesn't crash backend).
+- Verify UI layout matches "little bigger" request.
 
 ### To-dos
 
-- [ ] Initialize Tauri 2.0 project with React + TypeScript + Vite
-- [ ] Install and configure dependencies (Zustand, Tailwind CSS, Lucide React)
-- [ ] Create complete folder structure and header template file
-- [ ] Set up Zustand store with all slices and TypeScript types
-- [ ] Build main App layout with MenuBar, Toolbar, StatusBar components
-- [ ] Build CommandPanel and MainPanel components with all subcomponents
-- [ ] Create all modal components (Settings, Config, About, Tutorial)
-- [ ] Build reusable common components (Button, Dropdown, Input, Icon)
-- [ ] Apply Tailwind CSS styling to match Docklight-inspired design
-- [ ] Add GPL v3.0 headers to all source files
-- [ ] Create README.md and documentation files
+- [ ] Refactor Rust backend `send_data` to accept `Vec<u8>`
+- [ ] Update frontend `serialService` and `serialSlice` to handle byte arrays
+- [ ] Implement input parser functions in `formatters.ts`
+- [ ] Update `UiSlice` to include `inputFormat` state
+- [ ] Create SplitButton component and enhance `CommandInput` UI
+- [ ] Update `CommandItem` to use new send signature

@@ -31,45 +31,60 @@
  */
 
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, RefreshCw } from 'lucide-react';
 import { useStore } from '../../store';
 
 export function PortSelector() {
   const [isOpen, setIsOpen] = useState(false);
-  const { portName, availablePorts } = useStore();
+  const { portName, availablePorts, setSerialConfig, refreshPorts, isConnected } = useStore();
+
+  const handlePortSelect = (name: string) => {
+    setSerialConfig({ portName: name });
+    setIsOpen(false);
+  };
 
   return (
     <div className="relative">
       <button
-        className="flex items-center gap-1 px-2 py-0.5 hover:bg-gray-200 rounded"
+        className="flex items-center gap-1 px-2 py-0.5 hover:bg-gray-200 rounded disabled:opacity-50 disabled:cursor-not-allowed"
         onClick={() => setIsOpen(!isOpen)}
-        onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+        disabled={isConnected}
+        title={isConnected ? "Cannot change port while connected" : "Select COM port"}
       >
         <span>{portName || 'No Port'}</span>
         <ChevronDown size={12} />
       </button>
       {isOpen && (
-        <div className="absolute bottom-full mb-1 right-0 w-40 bg-white border border-gray-300 shadow-lg rounded">
-          {availablePorts.length > 0 ? (
-            availablePorts.map((port) => (
-              <button
-                key={port.name}
-                className="w-full px-3 py-1.5 text-left hover:bg-blue-100 text-xs"
-                onClick={() => setIsOpen(false)}
-              >
-                {port.name}
-              </button>
-            ))
-          ) : (
-            <div className="px-3 py-1.5 text-gray-400 text-xs">
-              No ports available
-            </div>
-          )}
+        <div className="absolute bottom-full mb-1 right-0 w-48 bg-white border border-gray-300 shadow-lg rounded z-50">
+          <div className="max-h-40 overflow-y-auto">
+            {availablePorts.length > 0 ? (
+              availablePorts.map((port) => (
+                <button
+                  key={port.name}
+                  className="w-full px-3 py-1.5 text-left hover:bg-blue-100 text-xs truncate"
+                  onClick={() => handlePortSelect(port.name)}
+                  title={port.description || port.name}
+                >
+                  {port.name}
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-1.5 text-gray-400 text-xs">
+                No ports available
+              </div>
+            )}
+          </div>
+          <div className="border-t border-gray-200 p-1">
+             <button 
+               className="w-full flex items-center justify-center gap-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded"
+               onClick={() => refreshPorts()}
+             >
+               <RefreshCw size={10} />
+               Refresh Ports
+             </button>
+          </div>
         </div>
       )}
     </div>
   );
 }
-
-
-

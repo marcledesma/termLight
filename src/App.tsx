@@ -30,6 +30,7 @@
  * @date 2025-11-19
  */
 
+import { useEffect } from 'react';
 import './App.css';
 import { MenuBar } from './components/MenuBar/MenuBar';
 import { Toolbar } from './components/Toolbar/Toolbar';
@@ -42,9 +43,35 @@ import { ConfigModal } from './components/Modals/ConfigModal';
 import { AboutModal } from './components/Modals/AboutModal';
 import { TutorialModal } from './components/Modals/TutorialModal';
 import { useStore } from './store';
+import { serialService } from './services/serialService';
 
 function App() {
-  const { activeModal } = useStore();
+  const activeModal = useStore((state) => state.activeModal);
+  const refreshPorts = useStore((state) => state.refreshPorts);
+  const appendLog = useStore((state) => state.appendLog);
+
+  useEffect(() => {
+    // Initial port fetch
+    refreshPorts();
+
+    // Listen for incoming data
+    console.log("Initializing data listener in App");
+    const unlistenPromise = serialService.listenToData((data) => {
+      console.log("App received data:", data);
+      appendLog({
+        timestamp: Date.now(),
+        direction: 'rx',
+        data: Array.from(data), // Convert Uint8Array to regular array for storage
+      });
+    });
+
+    return () => {
+      unlistenPromise.then((fn) => {
+        console.log("Cleaning up data listener");
+        fn();
+      });
+    };
+  }, [refreshPorts, appendLog]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -70,6 +97,3 @@ function App() {
 }
 
 export default App;
-
-
-

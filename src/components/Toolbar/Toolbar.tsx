@@ -39,12 +39,27 @@ import {
   Square,
   Settings,
   Palette,
+  Loader2,
 } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import { useStore } from '../../store';
 
 export function Toolbar() {
-  const { isConnected, setActiveModal } = useStore();
+  const { 
+    isConnected, 
+    isConnecting, 
+    connectPort, 
+    disconnectPort, 
+    setActiveModal 
+  } = useStore();
+
+  const handleRunClick = () => {
+    if (isConnected) {
+      disconnectPort();
+    } else {
+      connectPort();
+    }
+  };
 
   return (
     <div className="flex items-center gap-1 px-2 h-12 bg-gray-200 border-b border-gray-300">
@@ -53,16 +68,36 @@ export function Toolbar() {
       <ToolbarButton icon={Save} tooltip="Save" />
       <ToolbarButton icon={Printer} tooltip="Print" />
       <div className="w-px h-8 bg-gray-400 mx-1"></div>
-      {!isConnected ? (
-        <ToolbarButton icon={Play} tooltip="Run" className="text-green-600" />
+      
+      {isConnecting ? (
+        <ToolbarButton 
+          icon={Loader2} 
+          tooltip="Connecting..." 
+          className="text-blue-600 animate-spin" 
+          disabled 
+        />
+      ) : !isConnected ? (
+        <ToolbarButton 
+          icon={Play} 
+          tooltip="Run" 
+          className="text-green-600" 
+          onClick={handleRunClick}
+        />
       ) : (
-        <ToolbarButton icon={Square} tooltip="Stop" className="text-red-600" />
+        <ToolbarButton 
+          icon={Square} 
+          tooltip="Stop" 
+          className="text-red-600" 
+          onClick={handleRunClick}
+        />
       )}
+      
       <div className="w-px h-8 bg-gray-400 mx-1"></div>
       <ToolbarButton
         icon={Settings}
         tooltip="Communication Settings"
         onClick={() => setActiveModal('commSettings')}
+        disabled={isConnected}
       />
       <ToolbarButton
         icon={Palette}
@@ -72,6 +107,3 @@ export function Toolbar() {
     </div>
   );
 }
-
-
-

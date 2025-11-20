@@ -30,12 +30,40 @@
  * @date 2025-11-19
  */
 
+import { useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useStore } from '../../store';
+import { formatDataAsAscii, formatDataAsHex, formatDataAsDec, formatDataAsBin } from '../../utils/formatters';
 
 export function DataDisplay() {
-  const { dataFormat } = useStore();
+  const { dataFormat, dataLog } = useStore();
+  const bottomRef = useRef<HTMLDivElement>(null);
   const isSerialMonitor = dataFormat === 'Serial Monitor';
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [dataLog]);
+
+  const renderData = (data: number[]) => {
+    // Convert number[] back to Uint8Array for formatting
+    const uint8Data = new Uint8Array(data);
+    
+    switch (dataFormat) {
+      case 'HEX':
+        return formatDataAsHex(uint8Data);
+      case 'DEC':
+        return formatDataAsDec(uint8Data);
+      case 'BIN':
+        return formatDataAsBin(uint8Data);
+      case 'ASCII':
+      case 'Serial Monitor':
+      default:
+        return formatDataAsAscii(uint8Data);
+    }
+  };
 
   return (
     <div
@@ -47,14 +75,43 @@ export function DataDisplay() {
         }
       )}
     >
-      <div className="text-gray-500 italic">
-        {isSerialMonitor
-          ? 'Serial Monitor mode - Data will appear here...'
-          : `${dataFormat} mode - Data will appear here...`}
-      </div>
+      {dataLog.length === 0 && (
+        <div className="text-gray-500 italic">
+          {isSerialMonitor
+            ? 'Serial Monitor mode - Data will appear here...'
+            : `${dataFormat} mode - Data will appear here...`}
+        </div>
+      )}
+      
+      {dataLog.map((entry, index) => {
+        const formattedData = renderData(entry.data);
+        const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+        
+        if (isSerialMonitor) {
+          // Serial monitor style: just stream the text
+          return (
+            <span key={index} className="whitespace-pre-wrap break-all">
+              {formattedData}
+            </span>
+          );
+        }
+
+        // Docklight style: structured log
+        return (
+          <div key={index} className={clsx('mb-1', {
+            'text-blue-600': entry.direction === 'tx',
+            'text-red-600': entry.direction === 'rx' && !isSerialMonitor
+          })}>
+            <span className="text-xs text-gray-400 select-none mr-2">
+              [{timestamp}] {entry.direction.toUpperCase()}:
+            </span>
+            <span className="whitespace-pre-wrap break-all font-medium">
+              {formattedData}
+            </span>
+          </div>
+        );
+      })}
+      <div ref={bottomRef} />
     </div>
   );
 }
-
-
-

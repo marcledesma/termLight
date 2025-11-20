@@ -30,10 +30,44 @@
  * @date 2025-11-19
  */
 
-// Placeholder for serial port operations service
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import { SerialConfig, PortInfo } from '../types';
+
+export interface SerialPayload {
+  data: number[];
+}
+
 export const serialService = {
-  // Will be implemented in Phase 2
+  listPorts: async (): Promise<PortInfo[]> => {
+    return await invoke('list_ports');
+  },
+
+  connect: async (config: SerialConfig): Promise<void> => {
+    console.log('Connecting to port:', config);
+    await invoke('open_port', {
+      portName: config.portName,
+      baudRate: Number(config.baudRate),
+      dataBits: Number(config.dataBits),
+      stopBits: Number(config.stopBits),
+      parity: config.parity,
+    });
+  },
+
+  disconnect: async (): Promise<void> => {
+    await invoke('close_port');
+  },
+
+  send: async (data: Uint8Array | number[]): Promise<void> => {
+    // Tauri expects Vec<u8> as number[] or similar
+    await invoke('send_data', { data: Array.from(data) });
+  },
+
+  listenToData: async (callback: (data: Uint8Array) => void) => {
+    console.log('Setting up serial data listener');
+    return await listen<SerialPayload>('serial-payload', (event) => {
+      console.log('Serial data received:', event.payload);
+      callback(new Uint8Array(event.payload.data));
+    });
+  },
 };
-
-
-

@@ -32,32 +32,105 @@
 
 import { StateCreator } from 'zustand';
 import { SerialConfig, PortInfo } from '../../types';
+import { serialService } from '../../services/serialService';
 
 export interface SerialSlice {
   isConnected: boolean;
+  isConnecting: boolean;
+  error: string | null;
   portName: string;
   baudRate: number;
   parity: 'None' | 'Even' | 'Odd';
   dataBits: 5 | 6 | 7 | 8;
   stopBits: 1 | 1.5 | 2;
   availablePorts: PortInfo[];
+  
+  // Actions
   setIsConnected: (isConnected: boolean) => void;
   setSerialConfig: (config: Partial<SerialConfig>) => void;
-  setAvailablePorts: (ports: PortInfo[]) => void;
+  refreshPorts: () => Promise<void>;
+  connectPort: () => Promise<void>;
+  disconnectPort: () => Promise<void>;
+  sendSerialData: (data: Uint8Array) => Promise<void>;
+  clearError: () => void;
 }
 
-export const createSerialSlice: StateCreator<SerialSlice> = (set) => ({
+export const createSerialSlice: StateCreator<SerialSlice> = (set, get) => ({
   isConnected: false,
+  isConnecting: false,
+  error: null,
   portName: '',
   baudRate: 9600,
   parity: 'None',
   dataBits: 8,
   stopBits: 1,
   availablePorts: [],
+
   setIsConnected: (isConnected) => set({ isConnected }),
+  
   setSerialConfig: (config) => set((state) => ({ ...state, ...config })),
-  setAvailablePorts: (availablePorts) => set({ availablePorts }),
+  
+  refreshPorts: async () => {
+    try {
+      const ports = await serialService.listPorts();
+      set({ availablePorts: ports });
+      
+      // Auto-select first port if none selected
+      if (!get().portName && ports.length > 0) {
+        set({ portName: ports[0].name });
+      }
+    } catch (err) {
+      console.error('Failed to list ports:', err);
+      set({ error: 'Failed to list ports' });
+    }
+  },
+
+  connectPort: async () => {
+    const state = get();
+    if (!state.portName) {
+      set({ error: 'No port selected' });
+      return;
+    }
+
+    set({ isConnecting: true, error: null });
+
+    try {
+      await serialService.connect({
+        portName: state.portName,
+        baudRate: state.baudRate,
+        parity: state.parity,
+        dataBits: state.dataBits,
+        stopBits: state.stopBits,
+      });
+      set({ isConnected: true, isConnecting: false });
+    } catch (err) {
+      console.error('Failed to connect:', err);
+      set({ 
+        isConnected: false, 
+        isConnecting: false, 
+        error: typeof err === 'string' ? err : 'Failed to connect to port' 
+      });
+    }
+  },
+
+  disconnectPort: async () => {
+    try {
+      await serialService.disconnect();
+      set({ isConnected: false });
+    } catch (err) {
+      console.error('Failed to disconnect:', err);
+    }
+  },
+
+  sendSerialData: async (data: Uint8Array) => {
+    if (!get().isConnected) return;
+    try {
+      await serialService.send(data);
+    } catch (err) {
+      console.error('Failed to send data:', err);
+      set({ error: 'Failed to send data' });
+    }
+  },
+
+  clearError: () => set({ error: null }),
 });
-
-
-

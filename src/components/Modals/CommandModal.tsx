@@ -48,6 +48,7 @@ import {
   bytesToAscii
 } from '../../utils/formatters';
 import { commandService } from '../../services/commandService';
+import { appendCrc, CrcType } from '../../utils/crc';
 
 interface CommandModalProps {
   // If editing, pass the command ID to edit
@@ -66,6 +67,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
   const [inputValue, setInputValue] = useState('');
   const [format, setFormat] = useState<InputFormat>('ASCII');
   const [lineEnding, setLineEnding] = useState<LineEnding>('None');
+  const [crcType, setCrcType] = useState<CrcType>('None');
   const [error, setError] = useState<string | null>(null);
 
   // Initialize state when opening for edit
@@ -116,6 +118,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
       setInputValue('');
       setFormat('ASCII');
       setLineEnding('None');
+      setCrcType('None');
     }
     // Only run when the ID changes (modal open/switch mode), NOT when commands list changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,6 +162,9 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
           bytes = parseAsciiInput(text);
           break;
       }
+
+      // Append CRC if selected
+      bytes = appendCrc(bytes, crcType);
 
       // Convert bytes to normalized Hex String for storage
       const hexSequence = commandService.bytesToHexSequence(bytes);
@@ -265,6 +271,24 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
             {error && !error.includes('name') && (
               <p className="text-sm text-red-600">{error}</p>
             )}
+
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Add CRC Checksum
+              </label>
+              <select
+                value={crcType}
+                onChange={(e) => setCrcType(e.target.value as CrcType)}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="None">None</option>
+                <option value="CRC-8">CRC-8/MAXIM-DOW</option>
+                <option value="CRC-16">CRC-16/IBM-3740</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Calculated checksum will be appended to the command sequence.
+              </p>
+            </div>
           </div>
         </div>
 

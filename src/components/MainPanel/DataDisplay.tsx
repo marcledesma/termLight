@@ -38,7 +38,6 @@ import { formatDataAsAscii, formatDataAsHex, formatDataAsDec, formatDataAsBin } 
 export function DataDisplay() {
   const { dataFormat, dataLog } = useStore();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const isSerialMonitor = dataFormat === 'Serial Monitor';
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -58,8 +57,7 @@ export function DataDisplay() {
         return formatDataAsDec(uint8Data);
       case 'BIN':
         return formatDataAsBin(uint8Data);
-      case 'ASCII':
-      case 'Serial Monitor':
+      case 'Serial Monitor(ASCII)':
       default:
         return formatDataAsAscii(uint8Data);
     }
@@ -69,17 +67,12 @@ export function DataDisplay() {
     <div
       className={clsx(
         'flex-1 overflow-y-auto p-4 font-mono text-sm printable-content',
-        {
-          'bg-gray-900 text-green-400': isSerialMonitor,
-          'bg-white text-gray-800': !isSerialMonitor,
-        }
+        'bg-white text-gray-800'
       )}
     >
       {dataLog.length === 0 && (
         <div className="text-gray-500 italic">
-          {isSerialMonitor
-            ? 'Serial Monitor mode - Data will appear here...'
-            : `${dataFormat} mode - Data will appear here...`}
+          {`${dataFormat} mode - Data will appear here...`}
         </div>
       )}
       
@@ -87,20 +80,11 @@ export function DataDisplay() {
         const formattedData = renderData(entry.data);
         const timestamp = new Date(entry.timestamp).toLocaleTimeString();
         
-        if (isSerialMonitor) {
-          // Serial monitor style: just stream the text
-          return (
-            <span key={index} className="whitespace-pre-wrap break-all">
-              {formattedData}
-            </span>
-          );
-        }
-
         // Docklight style: structured log
         return (
           <div key={index} className={clsx('mb-1', {
             'text-blue-600': entry.direction === 'tx',
-            'text-red-600': entry.direction === 'rx' && !isSerialMonitor
+            'text-red-600': entry.direction === 'rx'
           })}>
             <span className="text-xs text-gray-400 select-none mr-2">
               [{timestamp}] {entry.direction.toUpperCase()}:

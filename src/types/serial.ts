@@ -33,7 +33,7 @@
 export type Parity = 'None' | 'Even' | 'Odd';
 export type DataBits = 5 | 6 | 7 | 8;
 export type StopBits = 1 | 1.5 | 2;
-export type DataFormat = 'ASCII' | 'HEX' | 'DEC' | 'BIN' | 'Serial Monitor';
+export type DataFormat = 'Serial Monitor(ASCII)' | 'HEX' | 'DEC' | 'BIN';
 export type InputFormat = 'ASCII' | 'HEX' | 'DEC' | 'BIN';
 export type LineEnding = 'None' | 'NL' | 'CR' | 'Both';
 

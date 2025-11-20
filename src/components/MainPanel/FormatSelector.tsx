@@ -34,7 +34,7 @@ import clsx from 'clsx';
 import { useStore } from '../../store';
 import { DataFormat } from '../../types';
 
-const formats: DataFormat[] = ['ASCII', 'HEX', 'DEC', 'BIN', 'Serial Monitor'];
+const formats: DataFormat[] = ['Serial Monitor(ASCII)', 'HEX', 'DEC', 'BIN'];
 
 export function FormatSelector() {
   const { dataFormat, setDataFormat } = useStore();

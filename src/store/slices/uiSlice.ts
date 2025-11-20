@@ -66,7 +66,7 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   activeModal: null,
   editingCommandId: null,
   commandToDeleteId: null,
-  dataFormat: 'ASCII',
+  dataFormat: 'Serial Monitor(ASCII)',
   inputFormat: 'ASCII',
   lineEnding: 'None',
   showDocumentation: true,

@@ -34,7 +34,7 @@ import { useEffect, useState } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Minus, Square, X, Maximize2 } from 'lucide-react';
 import clsx from 'clsx';
-import appIcon from '../../assets/icon.png';
+import appIcon from '../../../src-tauri/icons/icon.png';
 
 export function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -75,18 +75,9 @@ export function TitleBar() {
     appWindow.close();
   };
 
-  // Backup for drag if data-tauri-drag-region fails
-  const handleDrag = (e: React.MouseEvent) => {
-    // Only drag if left click and not on a button
-    if (e.button === 0 && (e.target as HTMLElement).tagName !== 'BUTTON') {
-       appWindow.startDragging();
-    }
-  };
-
   return (
     <div 
-      data-tauri-drag-region 
-      onMouseDown={handleDrag}
+      data-tauri-drag-region
       className={clsx(
         "h-8 flex justify-between items-center select-none",
         "bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700",

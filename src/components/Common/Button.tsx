@@ -34,7 +34,7 @@ import { ButtonHTMLAttributes } from 'react';
 import clsx from 'clsx';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'icon';
+  variant?: 'primary' | 'secondary' | 'icon' | 'danger';
   size?: 'sm' | 'md' | 'lg';
 }
 
@@ -58,6 +58,8 @@ export function Button({
             variant === 'secondary',
           'bg-transparent hover:bg-gray-100 focus:ring-gray-300':
             variant === 'icon',
+          'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500':
+            variant === 'danger',
           'px-3 py-1.5 text-sm rounded': size === 'sm',
           'px-4 py-2 text-base rounded-md': size === 'md',
           'px-6 py-3 text-lg rounded-lg': size === 'lg',

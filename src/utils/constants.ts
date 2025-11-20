@@ -36,5 +36,13 @@ export const STOP_BITS = [1, 1.5, 2] as const;
 export const PARITY_OPTIONS = ['None', 'Even', 'Odd'] as const;
 export const APP_VERSION = '0.1.0';
 
-
-
+export const THEME_COLORS = {
+  Light: {
+    receive: '#000000',
+    send: '#0000FF',
+  },
+  Dark: {
+    receive: '#E5E7EB', // gray-200
+    send: '#60A5FA', // blue-400
+  }
+} as const;

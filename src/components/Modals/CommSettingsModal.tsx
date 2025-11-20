@@ -69,12 +69,12 @@ export function CommSettingsModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold">Communication Settings</h2>
           <button
             onClick={() => setActiveModal(null)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             <X size={20} />
           </button>
@@ -134,7 +134,7 @@ export function CommSettingsModal() {
             <option value="2">2</option>
           </Dropdown>
         </div>
-        <div className="flex justify-end gap-2 p-4 border-t">
+        <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
           <Button variant="secondary" onClick={() => setActiveModal(null)}>
             Cancel
           </Button>

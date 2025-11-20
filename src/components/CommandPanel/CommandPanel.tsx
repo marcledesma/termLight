@@ -42,7 +42,7 @@ export function CommandPanel() {
   const { setActiveModal } = useStore();
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 border-l border-gray-300">
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-l border-gray-300 dark:border-gray-700">
       <CommandHeader />
       <div className="flex-1 overflow-y-auto">
         {commands.length > 0 ? (
@@ -50,12 +50,12 @@ export function CommandPanel() {
             <CommandItem key={command.id} command={command} />
           ))
         ) : (
-          <div className="p-4 text-center text-gray-500 text-sm">
+          <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
             {searchQuery ? 'No commands found' : 'No commands yet'}
           </div>
         )}
       </div>
-      <div className="p-2 border-t border-gray-300">
+      <div className="p-2 border-t border-gray-300 dark:border-gray-700">
         <Button 
           variant="primary" 
           size="sm" 

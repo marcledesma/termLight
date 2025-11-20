@@ -36,7 +36,7 @@ import { useStore } from '../../store';
 import { formatDataAsAscii, formatDataAsHex, formatDataAsDec, formatDataAsBin } from '../../utils/formatters';
 
 export function DataDisplay() {
-  const { dataFormat, dataLog } = useStore();
+  const { dataFormat, dataLog, fontSize, displayColors } = useStore();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
@@ -63,15 +63,28 @@ export function DataDisplay() {
     }
   };
 
+  const fontSizeClass = {
+    'Small': 'text-sm',
+    'Medium': 'text-base',
+    'Large': 'text-lg',
+  }[fontSize];
+
+  const metaFontSizeClass = {
+    'Small': 'text-xs',
+    'Medium': 'text-sm',
+    'Large': 'text-base',
+  }[fontSize];
+
   return (
     <div
       className={clsx(
-        'flex-1 overflow-y-auto p-4 font-mono text-sm printable-content',
-        'bg-white text-gray-800'
+        'flex-1 overflow-y-auto p-4 font-mono printable-content',
+        fontSizeClass,
+        'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100'
       )}
     >
       {dataLog.length === 0 && (
-        <div className="text-gray-500 italic">
+        <div className="text-gray-500 dark:text-gray-400 italic">
           {`${dataFormat} mode - Data will appear here...`}
         </div>
       )}
@@ -79,14 +92,12 @@ export function DataDisplay() {
       {dataLog.map((entry, index) => {
         const formattedData = renderData(entry.data);
         const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+        const color = entry.direction === 'rx' ? displayColors.receive : displayColors.send;
         
         // Docklight style: structured log
         return (
-          <div key={index} className={clsx('mb-1', {
-            'text-blue-600': entry.direction === 'tx',
-            'text-red-600': entry.direction === 'rx'
-          })}>
-            <span className="text-xs text-gray-400 select-none mr-2">
+          <div key={index} className="mb-1" style={{ color }}>
+            <span className={clsx("text-gray-400 select-none mr-2", metaFontSizeClass)}>
               [{timestamp}] {entry.direction.toUpperCase()}:
             </span>
             <span className="whitespace-pre-wrap break-all font-medium">

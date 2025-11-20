@@ -39,22 +39,22 @@ export function AboutModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold">About termLight</h2>
           <button
             onClick={() => setActiveModal(null)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             <X size={20} />
           </button>
         </div>
         <div className="p-6 space-y-4">
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-800">termLight</h3>
-            <p className="text-gray-600">Version 0.1.0</p>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white">termLight</h3>
+            <p className="text-gray-600 dark:text-gray-400">Version 0.1.0</p>
           </div>
-          <div className="text-sm text-gray-700 space-y-2">
+          <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
             <p>
               A serial communication tool for sending, receiving, and managing
               commands via COM ports.
@@ -69,20 +69,20 @@ export function AboutModal() {
                 href="https://github.com/marcledesma/termLight"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 GitHub Repository
               </a>
             </p>
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-              <p className="text-xs text-yellow-800">
+            <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded">
+              <p className="text-xs text-yellow-800 dark:text-yellow-200">
                 <strong>Note:</strong> Approximately 80% of this codebase was
                 generated using AI assistance. Please review and test thoroughly.
               </p>
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 p-4 border-t">
+        <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
           <Button onClick={() => setActiveModal(null)}>Close</Button>
         </div>
       </div>

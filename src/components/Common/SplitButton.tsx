@@ -98,14 +98,14 @@ export function SplitButton({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 bottom-full mb-1 z-10 mt-2 w-36 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="absolute right-0 bottom-full mb-1 z-10 mt-2 w-36 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-200 dark:border-gray-600">
           <div className="py-1">
             {options.map((option) => (
               <button
                 key={option}
                 className={clsx(
-                  "block w-full px-4 py-2 text-sm text-left hover:bg-gray-100",
-                  option === selectedOption ? "bg-gray-50 font-semibold text-gray-900" : "text-gray-700"
+                  "block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-700",
+                  option === selectedOption ? "bg-gray-50 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-100" : "text-gray-700 dark:text-gray-300"
                 )}
                 onClick={() => {
                   onOptionSelect(option);

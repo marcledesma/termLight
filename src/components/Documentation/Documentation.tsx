@@ -39,10 +39,10 @@ export function Documentation() {
 
   if (!showDocumentation) {
     return (
-      <div className="h-8 bg-gray-100 border-t border-gray-300 flex items-center px-2">
+      <div className="h-8 bg-gray-100 dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700 flex items-center px-2">
         <button
           onClick={() => setShowDocumentation(true)}
-          className="flex items-center gap-1 text-sm text-gray-700 hover:text-gray-900"
+          className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
         >
           <ChevronUp size={16} />
           Documentation
@@ -52,20 +52,21 @@ export function Documentation() {
   }
 
   return (
-    <div className="h-48 bg-gray-50 border-t border-gray-300 flex flex-col">
-      <div className="h-8 bg-gray-100 border-b border-gray-300 flex items-center justify-between px-2">
-        <span className="text-sm font-semibold text-gray-700">Documentation</span>
+    <div className="h-48 bg-gray-50 dark:bg-gray-900 border-t border-gray-300 dark:border-gray-700 flex flex-col">
+      <div className="h-8 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 flex items-center justify-between px-2">
+        <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Documentation</span>
         <button
           onClick={() => setShowDocumentation(false)}
-          className="text-gray-500 hover:text-gray-700"
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
         >
           <ChevronDown size={16} />
         </button>
       </div>
       <div className="flex-1 p-2">
         <textarea
-          className="w-full h-full px-3 py-2 border border-gray-300 rounded resize-none
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full h-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded resize-none
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm
+                   bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
           placeholder={
             selectedCommand
               ? `Add documentation for "${selectedCommand.name}"...`

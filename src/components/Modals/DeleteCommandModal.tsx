@@ -55,34 +55,34 @@ export function DeleteCommandModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-sm">
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-red-600 flex items-center gap-2">
             <AlertTriangle size={20} />
             Delete Command
           </h2>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             <X size={20} />
           </button>
         </div>
         <div className="p-6">
-          <p className="text-gray-700">
+          <p className="text-gray-700 dark:text-gray-300">
             Are you sure you want to delete this command?
           </p>
           {command && (
-            <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded text-sm">
-              <div className="font-semibold">{command.name}</div>
-              <div className="text-gray-500 font-mono truncate">{command.sequence}</div>
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded text-sm">
+              <div className="font-semibold text-gray-900 dark:text-gray-100">{command.name}</div>
+              <div className="text-gray-500 dark:text-gray-400 font-mono truncate">{command.sequence}</div>
             </div>
           )}
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
             This action cannot be undone.
           </p>
         </div>
-        <div className="flex justify-end gap-2 p-4 border-t bg-gray-50 rounded-b-lg">
+        <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 rounded-b-lg">
           <Button variant="secondary" onClick={handleClose}>Cancel</Button>
           <Button variant="danger" onClick={handleDelete}>Delete</Button>
         </div>

@@ -65,12 +65,12 @@ export function Toolbar() {
   };
 
   return (
-    <div className="flex items-center gap-1 px-2 h-12 bg-gray-200 border-b border-gray-300">
+    <div className="flex items-center gap-1 px-2 h-12 bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
       <ToolbarButton icon={FileText} tooltip="New" onClick={handleNew} />
       <ToolbarButton icon={FolderOpen} tooltip="Open" onClick={handleOpen} />
       <ToolbarButton icon={Save} tooltip="Save" onClick={handleSave} />
       <ToolbarButton icon={Printer} tooltip="Print" onClick={handlePrint} />
-      <div className="w-px h-8 bg-gray-400 mx-1"></div>
+      <div className="w-px h-8 bg-gray-400 dark:bg-gray-600 mx-1"></div>
       
       {isConnecting ? (
         <ToolbarButton 
@@ -95,7 +95,7 @@ export function Toolbar() {
         />
       )}
       
-      <div className="w-px h-8 bg-gray-400 mx-1"></div>
+      <div className="w-px h-8 bg-gray-400 dark:bg-gray-600 mx-1"></div>
       <ToolbarButton
         icon={Settings}
         tooltip="Communication Settings"

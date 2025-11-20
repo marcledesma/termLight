@@ -81,12 +81,12 @@ export function TutorialModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-        <div className="flex items-center justify-between p-4 border-b">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold">Tutorial</h2>
           <button
             onClick={() => setActiveModal(null)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             <X size={20} />
           </button>
@@ -96,10 +96,10 @@ export function TutorialModal() {
             <h3 className="text-xl font-semibold mb-2">
               {tutorialSteps[currentStep].title}
             </h3>
-            <p className="text-gray-700">{tutorialSteps[currentStep].content}</p>
+            <p className="text-gray-700 dark:text-gray-300">{tutorialSteps[currentStep].content}</p>
           </div>
           <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               Step {currentStep + 1} of {tutorialSteps.length}
             </div>
             <div className="flex gap-2">

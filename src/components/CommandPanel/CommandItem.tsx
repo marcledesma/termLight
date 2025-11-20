@@ -77,14 +77,14 @@ export function CommandItem({ command }: CommandItemProps) {
 
   return (
     <div
-      className="grid grid-cols-[60px_1fr_2fr_40px] gap-1 p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-xs relative group"
+      className="grid grid-cols-[60px_1fr_2fr_40px] gap-1 p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer text-xs relative group text-gray-900 dark:text-gray-100"
       onClick={() => setSelectedCommand(command)}
       onDoubleClick={handleDoubleClick}
     >
       <Button 
         variant="icon" 
         size="sm" 
-        className="h-7 w-full text-blue-600 hover:text-blue-800"
+        className="h-7 w-full text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
         onClick={handleSend}
         disabled={!isConnected}
         title="Send Command"
@@ -96,7 +96,7 @@ export function CommandItem({ command }: CommandItemProps) {
         {command.name}
       </div>
       
-      <div className="px-2 py-1 bg-transparent border border-transparent font-mono truncate select-none text-gray-600">
+      <div className="px-2 py-1 bg-transparent border border-transparent font-mono truncate select-none text-gray-600 dark:text-gray-400">
         {command.sequence}
       </div>
 

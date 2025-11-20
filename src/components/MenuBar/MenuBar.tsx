@@ -36,7 +36,7 @@ import { HelpMenu } from './HelpMenu';
 
 export function MenuBar() {
   return (
-    <div className="flex items-center h-8 bg-gray-100 border-b border-gray-300 text-sm">
+    <div className="flex items-center h-8 bg-gray-100 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 text-sm dark:text-gray-200">
       <FileMenu />
       <RunMenu />
       <HelpMenu />

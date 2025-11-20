@@ -31,8 +31,10 @@
  */
 
 import { useEffect } from 'react';
+import clsx from 'clsx';
 import './App.css';
 import { MenuBar } from './components/MenuBar/MenuBar';
+import { TitleBar } from './components/TitleBar/TitleBar';
 import { Toolbar } from './components/Toolbar/Toolbar';
 import { StatusBar } from './components/StatusBar/StatusBar';
 import { MainPanel } from './components/MainPanel/MainPanel';
@@ -52,6 +54,7 @@ function App() {
   const editingCommandId = useStore((state) => state.editingCommandId);
   const refreshPorts = useStore((state) => state.refreshPorts);
   const appendLog = useStore((state) => state.appendLog);
+  const theme = useStore((state) => state.theme);
 
   useEffect(() => {
     // Initial port fetch
@@ -77,26 +80,29 @@ function App() {
   }, [refreshPorts, appendLog]);
 
   return (
-    <div className="flex flex-col h-screen">
-      <MenuBar />
-      <Toolbar />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-col flex-[3]">
-          <MainPanel />
-          <Documentation />
+    <div className={clsx("flex flex-col h-screen", { "dark": theme === "Dark" })}>
+      <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
+        <TitleBar />
+        <MenuBar />
+        <Toolbar />
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-col flex-[3]">
+            <MainPanel />
+            <Documentation />
+          </div>
+          <div className="flex-[1] min-w-[300px] max-w-[400px] border-l border-gray-300 dark:border-gray-700">
+            <CommandPanel />
+          </div>
         </div>
-        <div className="flex-[1] min-w-[300px] max-w-[400px]">
-          <CommandPanel />
-        </div>
-      </div>
-      <StatusBar />
+        <StatusBar />
 
-      {activeModal === 'commSettings' && <CommSettingsModal />}
-      {activeModal === 'config' && <ConfigModal />}
-      {activeModal === 'about' && <AboutModal />}
-      {activeModal === 'tutorial' && <TutorialModal />}
-      {activeModal === 'command' && <CommandModal editingCommandId={editingCommandId} />}
-      {activeModal === 'deleteCommand' && <DeleteCommandModal />}
+        {activeModal === 'commSettings' && <CommSettingsModal />}
+        {activeModal === 'config' && <ConfigModal />}
+        {activeModal === 'about' && <AboutModal />}
+        {activeModal === 'tutorial' && <TutorialModal />}
+        {activeModal === 'command' && <CommandModal editingCommandId={editingCommandId} />}
+        {activeModal === 'deleteCommand' && <DeleteCommandModal />}
+      </div>
     </div>
   );
 }

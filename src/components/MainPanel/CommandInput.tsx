@@ -101,9 +101,9 @@ export function CommandInput() {
   };
 
   return (
-    <div className="p-3 border-t border-gray-300 bg-gray-50 flex flex-col gap-1">
+    <div className="p-3 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col gap-1">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-medium text-gray-500">Input ({inputFormat})</span>
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Input ({inputFormat})</span>
       </div>
       
       <div className="flex items-center gap-2">
@@ -118,19 +118,20 @@ export function CommandInput() {
                 ? "Enter text..." 
                 : `Enter ${inputFormat} values...`
             }
-            className="w-full h-11 px-3 py-2 border border-gray-300 rounded-md font-mono text-sm
+            className="w-full h-11 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md font-mono text-sm
                      focus:outline-none focus:ring-2 focus:ring-blue-500
-                     disabled:bg-gray-100 disabled:cursor-not-allowed"
+                     disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed
+                     bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
           />
           
           {/* Embedded Line Ending Selector for ASCII */}
           {inputFormat === 'ASCII' && (
-            <div className="absolute right-1 top-1 bottom-1 flex items-center bg-white">
-              <div className="h-6 w-px bg-gray-300 mx-2"></div>
+            <div className="absolute right-1 top-1 bottom-1 flex items-center bg-white dark:bg-gray-900 rounded-r-md">
+              <div className="h-6 w-px bg-gray-300 dark:bg-gray-700 mx-2"></div>
               <select
                 value={lineEnding}
                 onChange={(e) => setLineEnding(e.target.value as any)}
-                className="h-full border-none bg-transparent text-xs text-gray-600 font-medium focus:ring-0 cursor-pointer hover:text-gray-900 pr-8"
+                className="h-full border-none bg-transparent text-xs text-gray-600 dark:text-gray-400 font-medium focus:ring-0 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 pr-8"
               >
                 <option value="None">No Line Ending</option>
                 <option value="NL">New Line (NL)</option>

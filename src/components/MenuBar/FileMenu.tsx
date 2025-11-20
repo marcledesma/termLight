@@ -89,7 +89,7 @@ export function FileMenu() {
   return (
     <div className="relative">
       <button
-        className="px-3 py-1 hover:bg-gray-200"
+        className="px-3 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
         onClick={() => setIsOpen(!isOpen)}
@@ -98,39 +98,39 @@ export function FileMenu() {
       </button>
       {isOpen && (
         <div
-          className="absolute left-0 top-full w-56 bg-white border border-gray-300 shadow-lg z-10"
+          className="absolute left-0 top-full w-56 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg z-10"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
           <button 
-            className="w-full px-4 py-2 text-left hover:bg-blue-100 flex justify-between items-center"
+            className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 flex justify-between items-center"
             onClick={onNew}
           >
             <span>New Project</span>
-            <span className="text-xs text-gray-500">Ctrl+N</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Ctrl+N</span>
           </button>
           <button 
-            className="w-full px-4 py-2 text-left hover:bg-blue-100 flex justify-between items-center"
+            className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 flex justify-between items-center"
             onClick={onOpen}
           >
             <span>Open Project</span>
-            <span className="text-xs text-gray-500">Ctrl+O</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Ctrl+O</span>
           </button>
           <button 
-            className="w-full px-4 py-2 text-left hover:bg-blue-100 flex justify-between items-center"
+            className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 flex justify-between items-center"
             onClick={onSave}
           >
             <span>Save Project{isDirty ? ' *' : ''}</span>
-            <span className="text-xs text-gray-500">Ctrl+S</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Ctrl+S</span>
           </button>
-          <div className="border-t border-gray-200 my-1"></div>
+          <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
           {recentProjects.length > 0 ? (
             <>
-              <div className="px-4 py-1 text-xs text-gray-500">Recent Projects</div>
+              <div className="px-4 py-1 text-xs text-gray-500 dark:text-gray-400">Recent Projects</div>
               {recentProjects.map((project, index) => (
                 <button
                   key={index}
-                  className="w-full px-4 py-2 text-left hover:bg-blue-100 truncate"
+                  className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 truncate"
                   onClick={() => onLoadRecent(project.path)}
                   title={project.path}
                 >
@@ -139,11 +139,11 @@ export function FileMenu() {
               ))}
             </>
           ) : (
-            <div className="px-4 py-2 text-gray-400 text-sm">No recent projects</div>
+            <div className="px-4 py-2 text-gray-400 dark:text-gray-500 text-sm">No recent projects</div>
           )}
-          <div className="border-t border-gray-200 my-1"></div>
+          <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
           <button 
-            className="w-full px-4 py-2 text-left hover:bg-blue-100"
+            className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
             onClick={handleExit}
           >
             Exit

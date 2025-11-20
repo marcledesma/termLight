@@ -40,7 +40,7 @@ export function RunMenu() {
   return (
     <div className="relative">
       <button
-        className="px-3 py-1 hover:bg-gray-200"
+        className="px-3 py-1 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
         onClick={() => setIsOpen(!isOpen)}
@@ -49,18 +49,18 @@ export function RunMenu() {
       </button>
       {isOpen && (
         <div
-          className="absolute left-0 top-full w-56 bg-white border border-gray-300 shadow-lg z-10"
+          className="absolute left-0 top-full w-56 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg z-10"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
           <button
-            className="w-full px-4 py-2 text-left hover:bg-blue-100 disabled:text-gray-400 disabled:hover:bg-white"
+            className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:text-gray-400 disabled:hover:bg-white dark:disabled:bg-gray-800 dark:disabled:text-gray-500"
             disabled={isConnected}
           >
             Start Communication
           </button>
           <button
-            className="w-full px-4 py-2 text-left hover:bg-blue-100 disabled:text-gray-400 disabled:hover:bg-white"
+            className="w-full px-4 py-2 text-left hover:bg-blue-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:text-gray-400 disabled:hover:bg-white dark:disabled:bg-gray-800 dark:disabled:text-gray-500"
             disabled={!isConnected}
           >
             Stop Communication

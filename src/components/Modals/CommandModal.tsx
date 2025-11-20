@@ -182,14 +182,14 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-[500px] max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-[500px] max-h-[90vh] flex flex-col text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
             {editingCommandId ? 'Edit Command' : 'Add New Command'}
           </h2>
           <button
             onClick={() => setActiveModal(null)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
           >
             <X size={20} />
           </button>
@@ -208,7 +208,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
           />
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Command Sequence
             </label>
             
@@ -220,7 +220,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
                     setFormat(e.target.value as InputFormat);
                     if (error && !error.includes('name')) setError(null);
                   }}
-                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="ASCII">ASCII</option>
                   <option value="HEX">HEX</option>
@@ -236,7 +236,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
                     setLineEnding(e.target.value as LineEnding);
                     if (error && !error.includes('name')) setError(null);
                   }}
-                  className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="None">No Line Ending</option>
                   <option value="NL">New Line (NL)</option>
@@ -252,8 +252,8 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
                 setInputValue(e.target.value);
                 if (error && !error.includes('name')) setError(null);
               }}
-              className={`w-full h-32 px-3 py-2 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                error && error.includes('sequence') ? 'border-red-500' : 'border-gray-300'
+              className={`w-full h-32 px-3 py-2 border rounded-md font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+                error && error.includes('sequence') ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
               }`}
               placeholder={
                 format === 'ASCII' 
@@ -268,7 +268,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-200 flex justify-end gap-2">
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
           <Button
             variant="secondary"
             onClick={() => setActiveModal(null)}

@@ -31,7 +31,7 @@
  */
 
 import { StateCreator } from 'zustand';
-import { DataFormat, InputFormat, LineEnding } from '../../types';
+import { DataFormat, InputFormat, LineEnding, Theme, FontSize, DisplayColors } from '../../types';
 
 export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | 'command' | 'deleteCommand' | null;
 
@@ -51,6 +51,11 @@ export interface UiSlice {
   showDocumentation: boolean;
   dataLog: LogEntry[];
   
+  // Display Config
+  theme: Theme;
+  fontSize: FontSize;
+  displayColors: DisplayColors;
+
   setActiveModal: (modal: ModalType) => void;
   setEditingCommandId: (id: string | null) => void;
   setCommandToDeleteId: (id: string | null) => void;
@@ -60,6 +65,10 @@ export interface UiSlice {
   setShowDocumentation: (show: boolean) => void;
   appendLog: (entry: LogEntry) => void;
   clearLog: () => void;
+  
+  setTheme: (theme: Theme) => void;
+  setFontSize: (size: FontSize) => void;
+  setDisplayColors: (colors: DisplayColors) => void;
 }
 
 export const createUiSlice: StateCreator<UiSlice> = (set) => ({
@@ -71,6 +80,13 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   lineEnding: 'None',
   showDocumentation: true,
   dataLog: [],
+  
+  theme: 'Light',
+  fontSize: 'Small',
+  displayColors: {
+    receive: '#000000',
+    send: '#0000FF',
+  },
 
   setActiveModal: (activeModal) => set({ activeModal }),
   setEditingCommandId: (editingCommandId) => set({ editingCommandId }),
@@ -90,4 +106,8 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   }),
   
   clearLog: () => set({ dataLog: [] }),
+
+  setTheme: (theme) => set({ theme }),
+  setFontSize: (fontSize) => set({ fontSize }),
+  setDisplayColors: (displayColors) => set({ displayColors }),
 });

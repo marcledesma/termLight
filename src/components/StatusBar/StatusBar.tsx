@@ -43,13 +43,13 @@ export function StatusBar() {
   };
 
   return (
-    <div className="flex items-center justify-between h-6 px-2 bg-gray-100 border-t border-gray-300 text-xs">
+    <div className="flex items-center justify-between h-6 px-2 bg-gray-100 dark:bg-gray-800 border-t border-gray-300 dark:border-gray-700 text-xs dark:text-gray-300">
       <ConnectionStatus isConnected={isConnected} />
       <div className="flex items-center gap-2">
         <PortSelector />
-        <span className="text-gray-400">|</span>
+        <span className="text-gray-400 dark:text-gray-500">|</span>
         <span
-          className="cursor-pointer hover:bg-gray-200 px-2 py-0.5 rounded"
+          className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-0.5 rounded"
           onDoubleClick={handleSettingsDoubleClick}
           title="Double-click to open settings"
         >

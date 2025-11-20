@@ -98,7 +98,7 @@ export function FileMenu() {
       </button>
       {isOpen && (
         <div
-          className="absolute left-0 top-full w-56 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg z-10"
+          className="absolute left-0 top-full w-56 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 shadow-lg z-50"
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >

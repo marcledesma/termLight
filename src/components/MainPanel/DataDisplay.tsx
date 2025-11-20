@@ -36,15 +36,15 @@ import { useStore } from '../../store';
 import { formatDataAsAscii, formatDataAsHex, formatDataAsDec, formatDataAsBin } from '../../utils/formatters';
 
 export function DataDisplay() {
-  const { dataFormat, dataLog, fontSize, displayColors } = useStore();
+  const { dataFormat, dataLog, fontSize, displayColors, autoScroll } = useStore();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
-    if (bottomRef.current) {
+    if (bottomRef.current && autoScroll) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [dataLog]);
+  }, [dataLog, autoScroll]);
 
   const renderData = (data: number[]) => {
     // Convert number[] back to Uint8Array for formatting

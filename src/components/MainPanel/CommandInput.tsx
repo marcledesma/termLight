@@ -101,7 +101,7 @@ export function CommandInput() {
   };
 
   return (
-    <div className="p-3 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col gap-1">
+    <div className="p-3 border-t border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col gap-1 shrink-0">
       <div className="flex items-center justify-between px-1">
         <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Input ({inputFormat})</span>
       </div>

@@ -32,8 +32,9 @@
 
 import { useEffect, useState } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { Minus, Square, X, Zap, Maximize2 } from 'lucide-react';
+import { Minus, Square, X, Maximize2 } from 'lucide-react';
 import clsx from 'clsx';
+import appIcon from '../../assets/icon.png';
 
 export function TitleBar() {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -93,7 +94,7 @@ export function TitleBar() {
       )}
     >
       <div className="flex items-center px-3 gap-2 pointer-events-none">
-        <Zap size={16} className="text-blue-600 dark:text-blue-400" />
+        <img src={appIcon} alt="App Icon" className="w-4 h-4" />
         <span className="text-xs font-semibold">termLight</span>
       </div>
 

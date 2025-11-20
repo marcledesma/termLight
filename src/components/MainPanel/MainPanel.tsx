@@ -36,7 +36,7 @@ import { CommandInput } from './CommandInput';
 
 export function MainPanel() {
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div className="flex flex-col flex-1 min-h-0 bg-white dark:bg-gray-900">
       <FormatSelector />
       <DataDisplay />
       <CommandInput />

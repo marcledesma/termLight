@@ -49,6 +49,7 @@ export interface UiSlice {
   inputFormat: InputFormat;
   lineEnding: LineEnding;
   showDocumentation: boolean;
+  autoScroll: boolean;
   dataLog: LogEntry[];
   
   // Display Config
@@ -63,6 +64,7 @@ export interface UiSlice {
   setInputFormat: (format: InputFormat) => void;
   setLineEnding: (ending: LineEnding) => void;
   setShowDocumentation: (show: boolean) => void;
+  setAutoScroll: (autoScroll: boolean) => void;
   appendLog: (entry: LogEntry) => void;
   clearLog: () => void;
   
@@ -79,6 +81,7 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   inputFormat: 'ASCII',
   lineEnding: 'None',
   showDocumentation: true,
+  autoScroll: true,
   dataLog: [],
   
   theme: 'Light',
@@ -95,6 +98,7 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   setInputFormat: (inputFormat) => set({ inputFormat }),
   setLineEnding: (lineEnding) => set({ lineEnding }),
   setShowDocumentation: (showDocumentation) => set({ showDocumentation }),
+  setAutoScroll: (autoScroll) => set({ autoScroll }),
   
   appendLog: (entry) => set((state) => {
     // Limit log size to prevent performance issues

@@ -86,7 +86,7 @@ function App() {
         <MenuBar />
         <Toolbar />
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex flex-col flex-[3]">
+          <div className="flex flex-col flex-[3] min-w-0 overflow-hidden">
             <MainPanel />
             <Documentation />
           </div>

@@ -39,38 +39,40 @@ export function CommandHeader() {
   const { sortBy, setSortBy, searchQuery, setSearchQuery } = useStore();
 
   return (
-    <div className="p-2 border-b border-gray-300 space-y-2">
-      <div className="grid grid-cols-[60px_1fr_2fr] gap-1 text-xs font-semibold text-gray-700 px-1">
-        <div>Send</div>
-        <div>Name</div>
-        <div>Sequence</div>
+    <div className="flex flex-col border-b border-gray-300 bg-gray-50">
+      <div className="p-2 space-y-2">
+        <div className="flex gap-2">
+          <div className="w-1/3 min-w-[120px]">
+            <Dropdown
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'date' | 'alphabetical')}
+              className="text-xs w-full"
+            >
+              <option value="date">Creation Date</option>
+              <option value="alphabetical">Alphabetical</option>
+            </Dropdown>
+          </div>
+          <div className="relative flex-1">
+            <Search
+              size={14}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+            />
+            <Input
+              type="text"
+              placeholder="Search commands..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-7 text-xs w-full"
+            />
+          </div>
+        </div>
       </div>
-      <div className="flex gap-2">
-        <Dropdown
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as 'date' | 'alphabetical')}
-          className="text-xs flex-1"
-        >
-          <option value="date">Creation Date</option>
-          <option value="alphabetical">Alphabetical</option>
-        </Dropdown>
-      </div>
-      <div className="relative">
-        <Search
-          size={14}
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-        />
-        <Input
-          type="text"
-          placeholder="Search commands..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-7 text-xs"
-        />
+      <div className="grid grid-cols-[60px_1fr_2fr_30px] gap-1 px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-100 border-t border-gray-200">
+        <div className="text-center">Send</div>
+        <div className="pl-1">Name</div>
+        <div className="pl-1">Sequence</div>
+        <div></div>
       </div>
     </div>
   );
 }
-
-
-

@@ -49,6 +49,7 @@ import {
 } from '../../utils/formatters';
 import { commandService } from '../../services/commandService';
 import { appendCrc, CrcType } from '../../utils/crc';
+import { encodeCobs } from '../../utils/cobs';
 
 interface CommandModalProps {
   // If editing, pass the command ID to edit
@@ -68,6 +69,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
   const [format, setFormat] = useState<InputFormat>('ASCII');
   const [lineEnding, setLineEnding] = useState<LineEnding>('None');
   const [crcType, setCrcType] = useState<CrcType>('None');
+  const [useCobs, setUseCobs] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Initialize state when opening for edit
@@ -119,6 +121,7 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
       setFormat('ASCII');
       setLineEnding('None');
       setCrcType('None');
+      setUseCobs(false);
     }
     // Only run when the ID changes (modal open/switch mode), NOT when commands list changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,6 +168,11 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
 
       // Append CRC if selected
       bytes = appendCrc(bytes, crcType);
+
+      // Apply COBS encoding if enabled and in HEX mode
+      if (format === 'HEX' && useCobs) {
+        bytes = encodeCobs(bytes);
+      }
 
       // Convert bytes to normalized Hex String for storage
       const hexSequence = commandService.bytesToHexSequence(bytes);
@@ -289,6 +297,21 @@ export function CommandModal({ editingCommandId }: CommandModalProps) {
                 Calculated checksum will be appended to the command sequence.
               </p>
             </div>
+
+            {format === 'HEX' && (
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="useCobs"
+                  checked={useCobs}
+                  onChange={(e) => setUseCobs(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="useCobs" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Apply COBS Encoding
+                </label>
+              </div>
+            )}
           </div>
         </div>
 

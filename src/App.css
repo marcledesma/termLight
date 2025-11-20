@@ -53,5 +53,28 @@ body {
   overflow: hidden;
 }
 
-
-
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-content, .printable-content * {
+    visibility: visible;
+  }
+  .printable-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+    color: black !important;
+  }
+  
+  /* Force background colors/images to print if needed, or reset specific styles */
+  /* For serial monitor mode which is dark */
+  .printable-content.bg-gray-900 {
+    background-color: white !important;
+    color: black !important;
+  }
+}

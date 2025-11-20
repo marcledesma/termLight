@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import { useStore } from '../../store';
+import { useProjectOperations } from '../../hooks/useProjectOperations';
 
 export function Toolbar() {
   const { 
@@ -52,6 +53,8 @@ export function Toolbar() {
     disconnectPort, 
     setActiveModal 
   } = useStore();
+
+  const { handleNew, handleOpen, handleSave, handlePrint } = useProjectOperations();
 
   const handleRunClick = () => {
     if (isConnected) {
@@ -63,10 +66,10 @@ export function Toolbar() {
 
   return (
     <div className="flex items-center gap-1 px-2 h-12 bg-gray-200 border-b border-gray-300">
-      <ToolbarButton icon={FileText} tooltip="New" />
-      <ToolbarButton icon={FolderOpen} tooltip="Open" />
-      <ToolbarButton icon={Save} tooltip="Save" />
-      <ToolbarButton icon={Printer} tooltip="Print" />
+      <ToolbarButton icon={FileText} tooltip="New" onClick={handleNew} />
+      <ToolbarButton icon={FolderOpen} tooltip="Open" onClick={handleOpen} />
+      <ToolbarButton icon={Save} tooltip="Save" onClick={handleSave} />
+      <ToolbarButton icon={Printer} tooltip="Print" onClick={handlePrint} />
       <div className="w-px h-8 bg-gray-400 mx-1"></div>
       
       {isConnecting ? (

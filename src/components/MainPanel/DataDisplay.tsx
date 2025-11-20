@@ -68,7 +68,7 @@ export function DataDisplay() {
   return (
     <div
       className={clsx(
-        'flex-1 overflow-y-auto p-4 font-mono text-sm',
+        'flex-1 overflow-y-auto p-4 font-mono text-sm printable-content',
         {
           'bg-gray-900 text-green-400': isSerialMonitor,
           'bg-white text-gray-800': !isSerialMonitor,

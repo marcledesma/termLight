@@ -67,7 +67,7 @@ export function CommandHeader() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-[60px_1fr_2fr_30px] gap-1 px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-100 border-t border-gray-200">
+      <div className="grid grid-cols-[60px_1fr_2fr_40px] gap-1 px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-100 border-t border-gray-200">
         <div className="text-center">Send</div>
         <div className="pl-1">Name</div>
         <div className="pl-1">Sequence</div>

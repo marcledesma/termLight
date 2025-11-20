@@ -33,7 +33,7 @@
 import { StateCreator } from 'zustand';
 import { DataFormat, InputFormat, LineEnding } from '../../types';
 
-export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | 'command' | null;
+export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | 'command' | 'deleteCommand' | null;
 
 export interface LogEntry {
   timestamp: number;
@@ -43,7 +43,8 @@ export interface LogEntry {
 
 export interface UiSlice {
   activeModal: ModalType;
-  editingCommandId: string | null; // Add this
+  editingCommandId: string | null;
+  commandToDeleteId: string | null;
   dataFormat: DataFormat;
   inputFormat: InputFormat;
   lineEnding: LineEnding;
@@ -51,7 +52,8 @@ export interface UiSlice {
   dataLog: LogEntry[];
   
   setActiveModal: (modal: ModalType) => void;
-  setEditingCommandId: (id: string | null) => void; // Add this
+  setEditingCommandId: (id: string | null) => void;
+  setCommandToDeleteId: (id: string | null) => void;
   setDataFormat: (format: DataFormat) => void;
   setInputFormat: (format: InputFormat) => void;
   setLineEnding: (ending: LineEnding) => void;
@@ -62,7 +64,8 @@ export interface UiSlice {
 
 export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   activeModal: null,
-  editingCommandId: null, // Add this
+  editingCommandId: null,
+  commandToDeleteId: null,
   dataFormat: 'ASCII',
   inputFormat: 'ASCII',
   lineEnding: 'None',
@@ -70,7 +73,8 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   dataLog: [],
 
   setActiveModal: (activeModal) => set({ activeModal }),
-  setEditingCommandId: (editingCommandId) => set({ editingCommandId }), // Add this
+  setEditingCommandId: (editingCommandId) => set({ editingCommandId }),
+  setCommandToDeleteId: (commandToDeleteId) => set({ commandToDeleteId }),
   setDataFormat: (dataFormat) => set({ dataFormat }),
   setInputFormat: (inputFormat) => set({ inputFormat }),
   setLineEnding: (lineEnding) => set({ lineEnding }),

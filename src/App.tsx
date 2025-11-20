@@ -43,6 +43,7 @@ import { ConfigModal } from './components/Modals/ConfigModal';
 import { AboutModal } from './components/Modals/AboutModal';
 import { TutorialModal } from './components/Modals/TutorialModal';
 import { CommandModal } from './components/Modals/CommandModal';
+import { DeleteCommandModal } from './components/Modals/DeleteCommandModal';
 import { useStore } from './store';
 import { serialService } from './services/serialService';
 
@@ -95,6 +96,7 @@ function App() {
       {activeModal === 'about' && <AboutModal />}
       {activeModal === 'tutorial' && <TutorialModal />}
       {activeModal === 'command' && <CommandModal editingCommandId={editingCommandId} />}
+      {activeModal === 'deleteCommand' && <DeleteCommandModal />}
     </div>
   );
 }

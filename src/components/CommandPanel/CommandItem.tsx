@@ -34,7 +34,6 @@ import { Send, X } from 'lucide-react';
 import { Command } from '../../types';
 import { Button } from '../Common/Button';
 import { useStore } from '../../store';
-import { useCommands } from '../../hooks/useCommands';
 import { commandService } from '../../services/commandService';
 
 interface CommandItemProps {
@@ -42,8 +41,7 @@ interface CommandItemProps {
 }
 
 export function CommandItem({ command }: CommandItemProps) {
-  const { setSelectedCommand, sendSerialData, appendLog, isConnected, setActiveModal, setEditingCommandId } = useStore();
-  const { deleteCommand } = useCommands();
+  const { setSelectedCommand, sendSerialData, appendLog, isConnected, setActiveModal, setEditingCommandId, setCommandToDeleteId } = useStore();
 
   const handleSend = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent selecting the item when clicking send
@@ -73,17 +71,13 @@ export function CommandItem({ command }: CommandItemProps) {
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // We've enabled dialog:allow-confirm in capabilities, so this should work.
-    // If not, we might need to use the Tauri dialog API explicitly, 
-    // but window.confirm is usually polyfilled or allowed.
-    if (window.confirm('Are you sure you want to delete this command?')) {
-      deleteCommand(command.id);
-    }
+    setCommandToDeleteId(command.id);
+    setActiveModal('deleteCommand');
   };
 
   return (
     <div
-      className="grid grid-cols-[60px_1fr_2fr_30px] gap-1 p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-xs relative group"
+      className="grid grid-cols-[60px_1fr_2fr_40px] gap-1 p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-xs relative group"
       onClick={() => setSelectedCommand(command)}
       onDoubleClick={handleDoubleClick}
     >
@@ -109,11 +103,11 @@ export function CommandItem({ command }: CommandItemProps) {
       <Button
         variant="icon"
         size="sm"
-        className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-0"
         onClick={handleDelete}
         title="Delete Command"
       >
-        <X size={14} />
+        <X size={20} />
       </Button>
     </div>
   );

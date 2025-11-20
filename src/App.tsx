@@ -57,6 +57,19 @@ function App() {
   const theme = useStore((state) => state.theme);
 
   useEffect(() => {
+    const handleUnload = () => {
+      // Attempt to close port on reload/close
+      serialService.disconnect().catch(console.error);
+    };
+
+    window.addEventListener('beforeunload', handleUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload);
+    };
+  }, []);
+
+  useEffect(() => {
     // Initial port fetch
     refreshPorts();
 

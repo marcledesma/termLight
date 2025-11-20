@@ -37,9 +37,10 @@ mod commands;
 mod serial;
 
 use serial::state::SerialState;
+use tauri::Manager;
 
 fn main() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .manage(SerialState::new())
@@ -53,6 +54,15 @@ fn main() {
             commands::file::save_project_dialog,
             commands::file::load_project_dialog,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    app.run(|app_handle, event| {
+        if let tauri::RunEvent::ExitRequested { .. } = event {
+            let state = app_handle.state::<SerialState>();
+            if let Err(e) = commands::serial::close_port(state) {
+                eprintln!("Failed to close port on exit: {}", e);
+            }
+        }
+    });
 }

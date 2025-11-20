@@ -41,12 +41,17 @@ use serial::state::SerialState;
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
         .manage(SerialState::new())
         .invoke_handler(tauri::generate_handler![
             commands::serial::list_ports,
             commands::serial::open_port,
             commands::serial::close_port,
             commands::serial::send_data,
+            commands::file::save_project,
+            commands::file::load_project,
+            commands::file::save_project_dialog,
+            commands::file::load_project_dialog,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

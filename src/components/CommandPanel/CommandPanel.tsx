@@ -34,28 +34,19 @@ import { Plus } from 'lucide-react';
 import { CommandHeader } from './CommandHeader';
 import { CommandItem } from './CommandItem';
 import { Button } from '../Common/Button';
+import { useCommands } from '../../hooks/useCommands';
 import { useStore } from '../../store';
 
 export function CommandPanel() {
-  const { commands, searchQuery, sortBy } = useStore();
-
-  const filteredCommands = commands.filter((cmd) =>
-    cmd.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const sortedCommands = [...filteredCommands].sort((a, b) => {
-    if (sortBy === 'alphabetical') {
-      return a.name.localeCompare(b.name);
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  const { commands, searchQuery } = useCommands();
+  const { setActiveModal } = useStore();
 
   return (
     <div className="flex flex-col h-full bg-gray-50 border-l border-gray-300">
       <CommandHeader />
       <div className="flex-1 overflow-y-auto">
-        {sortedCommands.length > 0 ? (
-          sortedCommands.map((command) => (
+        {commands.length > 0 ? (
+          commands.map((command) => (
             <CommandItem key={command.id} command={command} />
           ))
         ) : (
@@ -65,7 +56,15 @@ export function CommandPanel() {
         )}
       </div>
       <div className="p-2 border-t border-gray-300">
-        <Button variant="primary" size="sm" className="w-full">
+        <Button 
+          variant="primary" 
+          size="sm" 
+          className="w-full"
+          onClick={() => {
+            useStore.getState().setEditingCommandId(null);
+            setActiveModal('command');
+          }}
+        >
           <Plus size={16} className="mr-1" />
           Add New Command
         </Button>
@@ -73,6 +72,3 @@ export function CommandPanel() {
     </div>
   );
 }
-
-
-

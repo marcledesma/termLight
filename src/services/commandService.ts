@@ -30,10 +30,92 @@
  * @date 2025-11-19
  */
 
-// Placeholder for command CRUD operations service
+import { Command, InputFormat, LineEnding } from '../types';
+
+/**
+ * Command service for CRUD operations on commands
+ */
 export const commandService = {
-  // Will be implemented in Phase 2
+  /**
+   * Create a new command
+   */
+  createCommand: (
+    name: string,
+    sequence: string,
+    documentation?: string,
+    repetitionMode: number = 0,
+    colorIndex: number = 5,
+    inputFormat?: InputFormat,
+    lineEnding?: LineEnding
+  ): Command => {
+    return {
+      id: crypto.randomUUID(),
+      name,
+      sequence,
+      documentation,
+      createdAt: new Date(),
+      repetitionMode,
+      colorIndex,
+      inputFormat,
+      lineEnding,
+    };
+  },
+
+  /**
+   * Validate command data
+   */
+  validateCommand: (command: Partial<Command>): string[] => {
+    const errors: string[] = [];
+
+    if (!command.name || command.name.trim() === '') {
+      errors.push('Command name is required');
+    }
+
+    if (!command.sequence || command.sequence.trim() === '') {
+      errors.push('Command sequence is required');
+    }
+
+    // Validate hex sequence format (space-separated hex bytes)
+    if (command.sequence) {
+      const hexPattern = /^[0-9A-Fa-f]{2}(\s+[0-9A-Fa-f]{2})*$/;
+      if (!hexPattern.test(command.sequence.trim())) {
+        errors.push('Command sequence must be space-separated hex bytes (e.g., "2D 2D 6F")');
+      }
+    }
+
+    return errors;
+  },
+
+  /**
+   * Format hex sequence to DochLight format (uppercase, space-separated)
+   */
+  formatHexSequence: (sequence: string): string => {
+    return sequence
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, ' '); // Normalize spaces
+  },
+
+  /**
+   * Parse hex sequence from DochLight format to bytes
+   */
+  parseHexSequence: (hexString: string): Uint8Array => {
+    const hexBytes = hexString.trim().split(/\s+/);
+    const bytes = new Uint8Array(hexBytes.length);
+    
+    for (let i = 0; i < hexBytes.length; i++) {
+      bytes[i] = parseInt(hexBytes[i], 16);
+    }
+    
+    return bytes;
+  },
+
+  /**
+   * Convert bytes to hex sequence string
+   */
+  bytesToHexSequence: (bytes: Uint8Array): string => {
+    return Array.from(bytes)
+      .map(b => b.toString(16).toUpperCase().padStart(2, '0'))
+      .join(' ');
+  },
 };
-
-
-

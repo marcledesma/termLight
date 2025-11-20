@@ -20,6 +20,26 @@ identifier = "allow-send-data"
 description = "Allows sending data to a serial port"
 commands.allow = ["send_data"]
 
+[[permission]]
+identifier = "allow-save-project"
+description = "Allows saving a project file"
+commands.allow = ["save_project"]
+
+[[permission]]
+identifier = "allow-load-project"
+description = "Allows loading a project file"
+commands.allow = ["load_project"]
+
+[[permission]]
+identifier = "allow-save-project-dialog"
+description = "Allows saving a project with file dialog"
+commands.allow = ["save_project_dialog"]
+
+[[permission]]
+identifier = "allow-load-project-dialog"
+description = "Allows loading a project with file dialog"
+commands.allow = ["load_project_dialog"]
+
 [[set]]
 identifier = "allow-serial-commands"
 description = "Allows all serial port commands"
@@ -28,6 +48,16 @@ permissions = [
   "allow-open-port",
   "allow-close-port",
   "allow-send-data"
+]
+
+[[set]]
+identifier = "allow-file-commands"
+description = "Allows all file operations commands"
+permissions = [
+  "allow-save-project",
+  "allow-load-project",
+  "allow-save-project-dialog",
+  "allow-load-project-dialog"
 ]
 
 

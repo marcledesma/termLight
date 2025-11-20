@@ -42,11 +42,13 @@ import { CommSettingsModal } from './components/Modals/CommSettingsModal';
 import { ConfigModal } from './components/Modals/ConfigModal';
 import { AboutModal } from './components/Modals/AboutModal';
 import { TutorialModal } from './components/Modals/TutorialModal';
+import { CommandModal } from './components/Modals/CommandModal';
 import { useStore } from './store';
 import { serialService } from './services/serialService';
 
 function App() {
   const activeModal = useStore((state) => state.activeModal);
+  const editingCommandId = useStore((state) => state.editingCommandId);
   const refreshPorts = useStore((state) => state.refreshPorts);
   const appendLog = useStore((state) => state.appendLog);
 
@@ -92,6 +94,7 @@ function App() {
       {activeModal === 'config' && <ConfigModal />}
       {activeModal === 'about' && <AboutModal />}
       {activeModal === 'tutorial' && <TutorialModal />}
+      {activeModal === 'command' && <CommandModal editingCommandId={editingCommandId} />}
     </div>
   );
 }

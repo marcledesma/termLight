@@ -30,40 +30,62 @@
  * @date 2025-11-19
  */
 
-import { Send } from 'lucide-react';
+import { Send, X } from 'lucide-react';
 import { Command } from '../../types';
 import { Button } from '../Common/Button';
 import { useStore } from '../../store';
-import { parseAsciiInput } from '../../utils/formatters';
+import { useCommands } from '../../hooks/useCommands';
+import { commandService } from '../../services/commandService';
 
 interface CommandItemProps {
   command: Command;
 }
 
 export function CommandItem({ command }: CommandItemProps) {
-  const { setSelectedCommand, sendSerialData, appendLog, isConnected } = useStore();
+  const { setSelectedCommand, sendSerialData, appendLog, isConnected, setActiveModal, setEditingCommandId } = useStore();
+  const { deleteCommand } = useCommands();
 
   const handleSend = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent selecting the item when clicking send
     if (!isConnected) return;
 
-    // For now, assume stored commands are ASCII
-    // In future, Command type should support formats
-    const data = parseAsciiInput(command.sequence);
-    
-    await sendSerialData(data);
-    
-    appendLog({
-      timestamp: Date.now(),
-      direction: 'tx',
-      data: Array.from(data), // Convert Uint8Array to regular array for storage
-    });
+    try {
+      // Command sequence is stored as normalized Hex String
+      // We need to parse it back to bytes to send
+      const data = commandService.parseHexSequence(command.sequence);
+      
+      await sendSerialData(data);
+      
+      appendLog({
+        timestamp: Date.now(),
+        direction: 'tx',
+        data: Array.from(data),
+      });
+    } catch (error) {
+      console.error("Failed to send command:", error);
+    }
+  };
+
+  const handleDoubleClick = () => {
+    setEditingCommandId(command.id);
+    setActiveModal('command');
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // We've enabled dialog:allow-confirm in capabilities, so this should work.
+    // If not, we might need to use the Tauri dialog API explicitly, 
+    // but window.confirm is usually polyfilled or allowed.
+    if (window.confirm('Are you sure you want to delete this command?')) {
+      deleteCommand(command.id);
+    }
   };
 
   return (
     <div
-      className="grid grid-cols-[60px_1fr_2fr] gap-1 p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-xs"
+      className="grid grid-cols-[60px_1fr_2fr_30px] gap-1 p-2 border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-xs relative group"
       onClick={() => setSelectedCommand(command)}
+      onDoubleClick={handleDoubleClick}
     >
       <Button 
         variant="icon" 
@@ -75,18 +97,24 @@ export function CommandItem({ command }: CommandItemProps) {
       >
         <Send size={14} />
       </Button>
-      <input
-        type="text"
-        value={command.name}
-        readOnly
-        className="px-2 py-1 bg-white border border-gray-300 rounded text-xs cursor-pointer"
-      />
-      <input
-        type="text"
-        value={command.sequence}
-        readOnly
-        className="px-2 py-1 bg-white border border-gray-300 rounded text-xs font-mono cursor-pointer"
-      />
+      
+      <div className="px-2 py-1 bg-transparent border border-transparent truncate select-none">
+        {command.name}
+      </div>
+      
+      <div className="px-2 py-1 bg-transparent border border-transparent font-mono truncate select-none text-gray-600">
+        {command.sequence}
+      </div>
+
+      <Button
+        variant="icon"
+        size="sm"
+        className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={handleDelete}
+        title="Delete Command"
+      >
+        <X size={14} />
+      </Button>
     </div>
   );
 }

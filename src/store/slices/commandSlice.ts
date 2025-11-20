@@ -47,7 +47,9 @@ export interface CommandSlice {
   deleteCommand: (id: string) => void;
 }
 
-export const createCommandSlice: StateCreator<CommandSlice> = (set) => ({
+export const createCommandSlice: StateCreator<
+  CommandSlice & { setIsDirty?: (isDirty: boolean) => void }
+> = (set, get) => ({
   commands: [],
   selectedCommand: null,
   sortBy: 'date',
@@ -56,18 +58,33 @@ export const createCommandSlice: StateCreator<CommandSlice> = (set) => ({
   setSelectedCommand: (selectedCommand) => set({ selectedCommand }),
   setSortBy: (sortBy) => set({ sortBy }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
-  addCommand: (command) =>
-    set((state) => ({ commands: [...state.commands, command] })),
-  updateCommand: (id, updates) =>
+  addCommand: (command) => {
+    set((state) => ({ commands: [...state.commands, command] }));
+    const state = get();
+    if (state.setIsDirty) {
+      state.setIsDirty(true);
+    }
+  },
+  updateCommand: (id, updates) => {
     set((state) => ({
       commands: state.commands.map((cmd) =>
         cmd.id === id ? { ...cmd, ...updates } : cmd
       ),
-    })),
-  deleteCommand: (id) =>
+    }));
+    const state = get();
+    if (state.setIsDirty) {
+      state.setIsDirty(true);
+    }
+  },
+  deleteCommand: (id) => {
     set((state) => ({
       commands: state.commands.filter((cmd) => cmd.id !== id),
-    })),
+    }));
+    const state = get();
+    if (state.setIsDirty) {
+      state.setIsDirty(true);
+    }
+  },
 });
 
 

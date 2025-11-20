@@ -30,11 +30,125 @@
  * @date 2025-11-19
  */
 
-// Placeholder for command management hook
+import { useMemo } from 'react';
+import { useStore } from '../store';
+import { commandService } from '../services/commandService';
+import { Command, InputFormat, LineEnding } from '../types';
+
+/**
+ * Hook for managing commands with filtering and sorting
+ */
 export function useCommands() {
-  // Will be implemented in Phase 2
-  return {};
+  const {
+    commands,
+    selectedCommand,
+    sortBy,
+    searchQuery,
+    addCommand,
+    updateCommand,
+    deleteCommand,
+    setSelectedCommand,
+    setSortBy,
+    setSearchQuery,
+  } = useStore();
+
+  // Filter commands based on search query
+  const filteredCommands = useMemo(() => {
+    if (!searchQuery) return commands;
+    
+    const query = searchQuery.toLowerCase();
+    return commands.filter(
+      (cmd) =>
+        cmd.name.toLowerCase().includes(query) ||
+        cmd.sequence.toLowerCase().includes(query) ||
+        cmd.documentation?.toLowerCase().includes(query)
+    );
+  }, [commands, searchQuery]);
+
+  // Sort commands
+  const sortedCommands = useMemo(() => {
+    const sorted = [...filteredCommands];
+    
+    if (sortBy === 'alphabetical') {
+      sorted.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      // Sort by date (newest first)
+      sorted.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+    
+    return sorted;
+  }, [filteredCommands, sortBy]);
+
+  // Create a new command
+  const createCommand = (
+    name: string,
+    sequence: string,
+    documentation?: string,
+    repetitionMode?: number,
+    colorIndex?: number,
+    inputFormat?: InputFormat,
+    lineEnding?: LineEnding
+  ) => {
+    const errors = commandService.validateCommand({ name, sequence });
+    if (errors.length > 0) {
+      throw new Error(errors.join(', '));
+    }
+
+    const formattedSequence = commandService.formatHexSequence(sequence);
+    const command = commandService.createCommand(
+      name,
+      formattedSequence,
+      documentation,
+      repetitionMode,
+      colorIndex,
+      inputFormat,
+      lineEnding
+    );
+    
+    addCommand(command);
+    return command;
+  };
+
+  // Update an existing command
+  const updateExistingCommand = (id: string, updates: Partial<Command>) => {
+    if (updates.sequence) {
+      // We need to include the name in validation because validateCommand requires it
+      // If name is not being updated, use a placeholder to bypass the name check
+      const nameToCheck = updates.name !== undefined ? updates.name : 'placeholder';
+      const errors = commandService.validateCommand({ 
+        name: nameToCheck, 
+        sequence: updates.sequence 
+      });
+
+      if (errors.length > 0) {
+        throw new Error(errors.join(', '));
+      }
+      updates.sequence = commandService.formatHexSequence(updates.sequence);
+    }
+    
+    updateCommand(id, updates);
+  };
+
+  // Delete a command
+  const removeCommand = (id: string) => {
+    if (selectedCommand?.id === id) {
+      setSelectedCommand(null);
+    }
+    deleteCommand(id);
+  };
+
+  return {
+    commands: sortedCommands,
+    selectedCommand,
+    sortBy,
+    searchQuery,
+    createCommand,
+    updateCommand: updateExistingCommand,
+    deleteCommand: removeCommand,
+    selectCommand: setSelectedCommand,
+    setSortBy,
+    setSearchQuery,
+    parseHexSequence: commandService.parseHexSequence,
+    bytesToHexSequence: commandService.bytesToHexSequence,
+  };
 }
-
-
-

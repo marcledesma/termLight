@@ -30,7 +30,7 @@
  * @date 2025-11-19
  */
 
-import { Command } from './command';
+import { Command, ReceiveCommand } from './command';
 import { SerialConfig } from './serial';
 
 export interface ProjectMetadata {
@@ -43,6 +43,11 @@ export interface Project {
   metadata: ProjectMetadata;
   serialConfig: SerialConfig;
   commands: Command[];
+  receiveCommands: ReceiveCommand[];
+  version: number;
+  commSettings: number[];
+  commDisplay: number;
+  commChannels: string[];
 }
 
 

@@ -30,11 +30,29 @@
  * @date 2025-11-19
  */
 
-// Placeholder for project file operations hook
+import { useStore } from '../store';
+
+/**
+ * Hook for project file operations
+ */
 export function useProject() {
-  // Will be implemented in Phase 2
-  return {};
+  const {
+    currentProject,
+    recentProjects,
+    isDirty,
+    loadProject,
+    saveProject,
+    newProject,
+  } = useStore();
+
+  return {
+    currentProject,
+    recentProjects,
+    isDirty,
+    loadProject,
+    saveProject,
+    newProject,
+    projectName: currentProject?.metadata.name || 'Untitled',
+    projectPath: currentProject?.metadata.path || '',
+  };
 }
-
-
-

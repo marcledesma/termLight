@@ -7,7 +7,12 @@
     "core:default",
     "core:event:allow-listen",
     "core:event:allow-emit",
-    "allow-serial-commands"
+    "allow-serial-commands",
+    "allow-file-commands",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-confirm",
+    "dialog:allow-message"
   ]
 }
 

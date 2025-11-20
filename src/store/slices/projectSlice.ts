@@ -32,6 +32,7 @@
 
 import { StateCreator } from 'zustand';
 import { Project, ProjectMetadata } from '../../types';
+import { projectService } from '../../services/projectService';
 
 export interface ProjectSlice {
   currentProject: Project | null;
@@ -40,15 +41,113 @@ export interface ProjectSlice {
   setCurrentProject: (project: Project | null) => void;
   setRecentProjects: (projects: ProjectMetadata[]) => void;
   setIsDirty: (isDirty: boolean) => void;
+  loadProject: () => Promise<void>;
+  saveProject: () => Promise<void>;
+  newProject: () => void;
 }
 
-export const createProjectSlice: StateCreator<ProjectSlice> = (set) => ({
+export const createProjectSlice: StateCreator<
+  ProjectSlice & { setCommands?: (commands: any[]) => void }
+> = (set, get) => ({
   currentProject: null,
   recentProjects: [],
   isDirty: false,
-  setCurrentProject: (currentProject) => set({ currentProject }),
+  setCurrentProject: (currentProject) => set({ currentProject, isDirty: false }),
   setRecentProjects: (recentProjects) => set({ recentProjects }),
   setIsDirty: (isDirty) => set({ isDirty }),
+  
+  loadProject: async () => {
+    try {
+      const result = await projectService.loadProject();
+      if (result) {
+        const { path, project } = result;
+        set({ currentProject: project, isDirty: false });
+        
+        // Update commands in the command slice
+        const state = get();
+        if (state.setCommands) {
+          state.setCommands(project.commands);
+        }
+        
+        // Add to recent projects
+        const metadata: ProjectMetadata = {
+          name: project.metadata.name,
+          path,
+          lastModified: new Date(),
+        };
+        
+        const state2 = get();
+        const recentProjects = [
+          metadata,
+          ...state2.recentProjects.filter((p) => p.path !== path),
+        ].slice(0, 10);
+        
+        set({ recentProjects });
+      }
+    } catch (error) {
+      console.error('Failed to load project:', error);
+      throw error;
+    }
+  },
+  
+  saveProject: async () => {
+    try {
+      const state = get();
+      const currentProject = state.currentProject;
+      
+      if (!currentProject) {
+        // Create new project from current state
+        const newProject = projectService.createNewProject();
+        if (state.setCommands) {
+          // Get commands from command slice if available
+          newProject.commands = (state as any).commands || [];
+        }
+        
+        const savedPath = await projectService.saveProject(newProject);
+        if (savedPath) {
+          newProject.metadata.path = savedPath;
+          newProject.metadata.name = savedPath.split(/[/\\]/).pop()?.replace(/\.ptp$/, '') || 'Untitled';
+          set({ currentProject: newProject, isDirty: false });
+        }
+      } else {
+        // Update current project with latest commands
+        const updatedProject = {
+          ...currentProject,
+          commands: (state as any).commands || currentProject.commands,
+          metadata: {
+            ...currentProject.metadata,
+            lastModified: new Date(),
+          },
+        };
+        
+        if (currentProject.metadata.path) {
+          await projectService.saveProjectToPath(updatedProject, currentProject.metadata.path);
+          set({ currentProject: updatedProject, isDirty: false });
+        } else {
+          const savedPath = await projectService.saveProject(updatedProject);
+          if (savedPath) {
+            updatedProject.metadata.path = savedPath;
+            updatedProject.metadata.name = savedPath.split(/[/\\]/).pop()?.replace(/\.ptp$/, '') || 'Untitled';
+            set({ currentProject: updatedProject, isDirty: false });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save project:', error);
+      throw error;
+    }
+  },
+  
+  newProject: () => {
+    const newProject = projectService.createNewProject();
+    set({ currentProject: newProject, isDirty: false });
+    
+    // Clear commands
+    const state = get();
+    if (state.setCommands) {
+      state.setCommands([]);
+    }
+  },
 });
 
 

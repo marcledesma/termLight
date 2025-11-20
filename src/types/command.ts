@@ -30,15 +30,33 @@
  * @date 2025-11-19
  */
 
+import { InputFormat, LineEnding } from './serial';
+
 export interface Command {
   id: string;
   name: string;
   sequence: string;
   documentation?: string;
   createdAt: Date;
+  repetitionMode: number;
+  colorIndex: number;
+  // Optional metadata to preserve user preference for display
+  inputFormat?: InputFormat;
+  lineEnding?: LineEnding;
 }
 
 export type CommandSort = 'date' | 'alphabetical';
 
-
-
+export interface ReceiveCommand {
+  index: number;
+  name: string;
+  hex_data: string;
+  param1: number;
+  param2: number;
+  comment: string;
+  comment_text: string;
+  param3: number;
+  param4: number;
+  param5: number;
+  param6: number;
+}

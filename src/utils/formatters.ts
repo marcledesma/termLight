@@ -30,6 +30,12 @@
  * @date 2025-11-19
  */
 
+// Display Formatters (Forward aliases)
+export const bytesToAscii = formatDataAsAscii;
+export const bytesToHex = formatDataAsHex;
+export const bytesToDec = formatDataAsDec;
+export const bytesToBin = formatDataAsBin;
+
 export function formatDataAsAscii(data: Uint8Array): string {
   return new TextDecoder().decode(data);
 }

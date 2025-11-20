@@ -114,13 +114,10 @@ export function CommandInput() {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              isConnected 
-                ? inputFormat === 'ASCII' 
-                  ? "Enter text..." 
-                  : `Enter ${inputFormat} values...`
-                : "Connect to send commands"
+              inputFormat === 'ASCII' 
+                ? "Enter text..." 
+                : `Enter ${inputFormat} values...`
             }
-            disabled={!isConnected}
             className="w-full h-11 px-3 py-2 border border-gray-300 rounded-md font-mono text-sm
                      focus:outline-none focus:ring-2 focus:ring-blue-500
                      disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -133,7 +130,6 @@ export function CommandInput() {
               <select
                 value={lineEnding}
                 onChange={(e) => setLineEnding(e.target.value as any)}
-                disabled={!isConnected}
                 className="h-full border-none bg-transparent text-xs text-gray-600 font-medium focus:ring-0 cursor-pointer hover:text-gray-900 pr-8"
               >
                 <option value="None">No Line Ending</option>
@@ -150,7 +146,7 @@ export function CommandInput() {
           onOptionSelect={(opt) => setInputFormat(opt as InputFormat)}
           options={['ASCII', 'HEX', 'DEC', 'BIN']}
           selectedOption={inputFormat}
-          disabled={!isConnected || !inputValue}
+          mainActionDisabled={!isConnected || !inputValue}
           className="h-11"
         />
       </div>

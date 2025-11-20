@@ -40,6 +40,7 @@ interface SplitButtonProps {
   options: string[];
   selectedOption: string;
   disabled?: boolean;
+  mainActionDisabled?: boolean;
   className?: string;
 }
 
@@ -49,6 +50,7 @@ export function SplitButton({
   options,
   selectedOption,
   disabled = false,
+  mainActionDisabled = false,
   className,
 }: SplitButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +79,7 @@ export function SplitButton({
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
         )}
         onClick={onClick}
-        disabled={disabled}
+        disabled={disabled || mainActionDisabled}
       >
         <Send className="-ml-0.5 h-5 w-5" aria-hidden="true" />
         Send

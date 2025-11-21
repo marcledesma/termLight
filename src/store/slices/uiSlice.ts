@@ -58,6 +58,13 @@ export interface UiSlice {
   displayColors: DisplayColors;
   cobsEnabled: boolean;
   crcType: CrcType;
+  commandColumnWidths: {
+    send: number;
+    name: number;
+    sequence: number;
+    delete: number;
+  };
+  commandPanelWidth: number;
 
   setActiveModal: (modal: ModalType) => void;
   setEditingCommandId: (id: string | null) => void;
@@ -75,6 +82,8 @@ export interface UiSlice {
   setDisplayColors: (colors: DisplayColors) => void;
   setCobsEnabled: (enabled: boolean) => void;
   setCrcType: (type: CrcType) => void;
+  setCommandColumnWidths: (widths: { send: number; name: number; sequence: number; delete: number }) => void;
+  setCommandPanelWidth: (width: number) => void;
 }
 
 export const createUiSlice: StateCreator<UiSlice> = (set) => ({
@@ -84,7 +93,7 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   dataFormat: 'Serial Monitor(ASCII)',
   inputFormat: 'ASCII',
   lineEnding: 'None',
-  showDocumentation: true,
+  showDocumentation: false,
   autoScroll: true,
   dataLog: [],
   
@@ -96,6 +105,13 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   },
   cobsEnabled: false,
   crcType: 'None',
+  commandColumnWidths: {
+    send: 46,
+    name: 164,
+    sequence: 113,
+    delete: 38,
+  },
+  commandPanelWidth: 361,
 
   setActiveModal: (activeModal) => set({ activeModal }),
   setEditingCommandId: (editingCommandId) => set({ editingCommandId }),
@@ -122,4 +138,6 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   setDisplayColors: (displayColors) => set({ displayColors }),
   setCobsEnabled: (cobsEnabled) => set({ cobsEnabled }),
   setCrcType: (crcType) => set({ crcType }),
+  setCommandColumnWidths: (commandColumnWidths) => set({ commandColumnWidths }),
+  setCommandPanelWidth: (commandPanelWidth) => set({ commandPanelWidth }),
 });

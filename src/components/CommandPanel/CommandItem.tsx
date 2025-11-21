@@ -41,7 +41,7 @@ interface CommandItemProps {
 }
 
 export function CommandItem({ command }: CommandItemProps) {
-  const { setSelectedCommand, sendSerialData, appendLog, isConnected, setActiveModal, setEditingCommandId, setCommandToDeleteId } = useStore();
+  const { setSelectedCommand, sendSerialData, appendLog, isConnected, setActiveModal, setEditingCommandId, setCommandToDeleteId, commandColumnWidths } = useStore();
 
   const handleSend = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent selecting the item when clicking send
@@ -77,38 +77,55 @@ export function CommandItem({ command }: CommandItemProps) {
 
   return (
     <div
-      className="grid grid-cols-[60px_1fr_2fr_40px] gap-1 p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer text-xs relative group text-gray-900 dark:text-gray-100"
+      className="flex p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer text-xs relative group text-gray-900 dark:text-gray-100"
       onClick={() => setSelectedCommand(command)}
       onDoubleClick={handleDoubleClick}
     >
-      <Button 
-        variant="icon" 
-        size="sm" 
-        className="h-7 w-full text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-        onClick={handleSend}
-        disabled={!isConnected}
-        title="Send Command"
+      <div 
+        className="flex items-center justify-center"
+        style={{ width: `${commandColumnWidths.send}px` }}
       >
-        <Send size={14} />
-      </Button>
+        <Button 
+          variant="icon" 
+          size="sm" 
+          className="h-7 w-full text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+          onClick={handleSend}
+          disabled={!isConnected}
+          title="Send Command"
+        >
+          <Send size={14} />
+        </Button>
+      </div>
       
-      <div className="px-2 py-1 bg-transparent border border-transparent truncate select-none">
+      <div 
+        className="px-2 py-1 bg-transparent truncate select-none overflow-hidden flex items-center"
+        style={{ width: `${commandColumnWidths.name}px` }}
+        title={command.name}
+      >
         {command.name}
       </div>
       
-      <div className="px-2 py-1 bg-transparent border border-transparent font-mono truncate select-none text-gray-600 dark:text-gray-400">
+      <div 
+        className="px-2 py-1 bg-transparent font-mono truncate select-none text-gray-600 dark:text-gray-400 overflow-hidden flex items-center flex-1"
+        title={command.sequence}
+      >
         {command.sequence}
       </div>
 
-      <Button
-        variant="icon"
-        size="sm"
-        className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-0"
-        onClick={handleDelete}
-        title="Delete Command"
+      <div 
+        className="flex items-center justify-center"
+        style={{ width: `${commandColumnWidths.delete}px` }}
       >
-        <X size={20} />
-      </Button>
+        <Button
+          variant="icon"
+          size="sm"
+          className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-0"
+          onClick={handleDelete}
+          title="Delete Command"
+        >
+          <X size={20} />
+        </Button>
+      </div>
     </div>
   );
 }

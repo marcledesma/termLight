@@ -30,13 +30,48 @@
  * @date 2025-11-19
  */
 
-import { Search } from 'lucide-react';
+import { Search, GripVertical } from 'lucide-react';
+import { useState, useRef } from 'react';
 import { Dropdown } from '../Common/Dropdown';
 import { Input } from '../Common/Input';
 import { useStore } from '../../store';
 
 export function CommandHeader() {
-  const { sortBy, setSortBy, searchQuery, setSearchQuery } = useStore();
+  const { sortBy, setSortBy, searchQuery, setSearchQuery, commandColumnWidths, setCommandColumnWidths } = useStore();
+  const [resizing, setResizing] = useState<'name' | null>(null);
+  const startXRef = useRef(0);
+  const startWidthsRef = useRef({ name: 0, sequence: 0 });
+
+  const handleMouseDown = (column: 'name', e: React.MouseEvent) => {
+    e.preventDefault();
+    setResizing(column);
+    startXRef.current = e.clientX;
+    startWidthsRef.current = {
+      name: commandColumnWidths.name,
+      sequence: 0, // Not used anymore
+    };
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startXRef.current;
+      
+      if (column === 'name') {
+        const newNameWidth = Math.max(76, startWidthsRef.current.name + deltaX);
+        setCommandColumnWidths({
+          ...commandColumnWidths,
+          name: newNameWidth,
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setResizing(null);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   return (
     <div className="flex flex-col border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
@@ -67,11 +102,28 @@ export function CommandHeader() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-[60px_1fr_2fr_40px] gap-1 px-2 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-center">Send</div>
-        <div className="pl-1">Name</div>
-        <div className="pl-1">Sequence</div>
-        <div></div>
+      <div 
+        className="flex px-2 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
+      >
+        <div className="text-center flex items-center justify-center" style={{ width: `${commandColumnWidths.send}px` }}>
+          Send
+        </div>
+        
+        <div className="flex items-center relative" style={{ width: `${commandColumnWidths.name}px` }}>
+          <div className="pl-2 flex-1">Name</div>
+          <div
+            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 flex items-center justify-center group z-10"
+            onMouseDown={(e) => handleMouseDown('name', e)}
+          >
+            <GripVertical size={12} className="text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100" />
+          </div>
+        </div>
+        
+        <div className="flex items-center flex-1">
+          <div className="pl-2">Sequence</div>
+        </div>
+        
+        <div className="flex items-center justify-center" style={{ width: `${commandColumnWidths.delete}px` }}></div>
       </div>
     </div>
   );

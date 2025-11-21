@@ -30,7 +30,8 @@
  * @date 2025-11-19
  */
 
-import { Plus } from 'lucide-react';
+import { Plus, GripVertical } from 'lucide-react';
+import { useRef } from 'react';
 import { CommandHeader } from './CommandHeader';
 import { CommandItem } from './CommandItem';
 import { Button } from '../Common/Button';
@@ -39,10 +40,38 @@ import { useStore } from '../../store';
 
 export function CommandPanel() {
   const { commands, searchQuery } = useCommands();
-  const { setActiveModal } = useStore();
+  const { setActiveModal, commandPanelWidth, setCommandPanelWidth } = useStore();
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
+
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startXRef.current = e.clientX;
+    startWidthRef.current = commandPanelWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = startXRef.current - moveEvent.clientX; // Inverted because we're resizing from left
+      const newWidth = Math.max(285, Math.min(570, startWidthRef.current + deltaX));
+      setCommandPanelWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-l border-gray-300 dark:border-gray-700">
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-l border-gray-300 dark:border-gray-700 relative">
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 flex items-center justify-center group z-20"
+        onMouseDown={handleResizeMouseDown}
+      >
+        <GripVertical size={12} className="text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100" />
+      </div>
       <CommandHeader />
       <div className="flex-1 overflow-y-auto">
         {commands.length > 0 ? (

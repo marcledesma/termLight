@@ -55,6 +55,7 @@ function App() {
   const refreshPorts = useStore((state) => state.refreshPorts);
   const appendLog = useStore((state) => state.appendLog);
   const theme = useStore((state) => state.theme);
+  const commandPanelWidth = useStore((state) => state.commandPanelWidth);
 
   useEffect(() => {
     const handleUnload = () => {
@@ -99,11 +100,14 @@ function App() {
         <MenuBar />
         <Toolbar />
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex flex-col flex-[3] min-w-0 overflow-hidden">
+          <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
             <MainPanel />
             <Documentation />
           </div>
-          <div className="flex-[1] min-w-[300px] max-w-[400px] border-l border-gray-300 dark:border-gray-700">
+          <div 
+            className="border-l border-gray-300 dark:border-gray-700"
+            style={{ width: `${commandPanelWidth}px`, minWidth: '285px', maxWidth: '570px' }}
+          >
             <CommandPanel />
           </div>
         </div>

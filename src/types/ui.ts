@@ -32,6 +32,7 @@
 
 export type Theme = 'Light' | 'Dark';
 export type FontSize = 'Small' | 'Medium' | 'Large';
+export type CrcType = 'None' | 'CRC-8' | 'CRC-16';
 
 export interface DisplayColors {
   receive: string;

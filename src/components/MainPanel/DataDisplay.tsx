@@ -34,9 +34,11 @@ import { useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useStore } from '../../store';
 import { formatDataAsAscii, formatDataAsHex, formatDataAsDec, formatDataAsBin } from '../../utils/formatters';
+import { decodeCobs } from '../../utils/cobs';
+import { validateCrc } from '../../utils/crc';
 
 export function DataDisplay() {
-  const { dataFormat, dataLog, fontSize, displayColors, autoScroll } = useStore();
+  const { dataFormat, dataLog, fontSize, displayColors, autoScroll, cobsEnabled, crcType } = useStore();
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
@@ -46,21 +48,50 @@ export function DataDisplay() {
     }
   }, [dataLog, autoScroll]);
 
-  const renderData = (data: number[]) => {
+  const renderData = (data: number[]): { formatted: string; crcValid: boolean | null } => {
     // Convert number[] back to Uint8Array for formatting
-    const uint8Data = new Uint8Array(data);
+    let uint8Data = new Uint8Array(data);
+    let crcValid: boolean | null = null;
     
+    // Apply COBS decoding and CRC validation only for HEX mode
+    if (dataFormat === 'HEX') {
+      try {
+        // First, decode COBS if enabled
+        if (cobsEnabled) {
+          uint8Data = decodeCobs(uint8Data);
+        }
+        
+        // Then, validate and strip CRC if enabled
+        if (crcType !== 'None') {
+          const validation = validateCrc(uint8Data, crcType);
+          crcValid = validation.isValid;
+          uint8Data = validation.dataWithoutCrc;
+        }
+      } catch (error) {
+        console.error('Error processing HEX data:', error);
+        // If processing fails, show original data
+        crcValid = false;
+      }
+    }
+    
+    let formatted: string;
     switch (dataFormat) {
       case 'HEX':
-        return formatDataAsHex(uint8Data);
+        formatted = formatDataAsHex(uint8Data);
+        break;
       case 'DEC':
-        return formatDataAsDec(uint8Data);
+        formatted = formatDataAsDec(uint8Data);
+        break;
       case 'BIN':
-        return formatDataAsBin(uint8Data);
+        formatted = formatDataAsBin(uint8Data);
+        break;
       case 'Serial Monitor(ASCII)':
       default:
-        return formatDataAsAscii(uint8Data);
+        formatted = formatDataAsAscii(uint8Data);
+        break;
     }
+    
+    return { formatted, crcValid };
   };
 
   const fontSizeClass = {
@@ -90,7 +121,7 @@ export function DataDisplay() {
       )}
       
       {dataLog.map((entry, index) => {
-        const formattedData = renderData(entry.data);
+        const { formatted, crcValid } = renderData(entry.data);
         const timestamp = new Date(entry.timestamp).toLocaleTimeString();
         const color = entry.direction === 'rx' ? displayColors.receive : displayColors.send;
         
@@ -101,8 +132,17 @@ export function DataDisplay() {
               [{timestamp}] {entry.direction.toUpperCase()}:
             </span>
             <span className="whitespace-pre-wrap break-all font-medium">
-              {formattedData}
+              {formatted}
             </span>
+            {crcValid !== null && (
+              <span className={clsx("ml-2 select-none", metaFontSizeClass)}>
+                {crcValid ? (
+                  <span className="text-green-600 dark:text-green-400">✓ CRC</span>
+                ) : (
+                  <span className="text-red-600 dark:text-red-400">✗ CRC</span>
+                )}
+              </span>
+            )}
           </div>
         );
       })}

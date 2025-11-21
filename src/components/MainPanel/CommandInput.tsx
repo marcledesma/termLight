@@ -35,6 +35,8 @@ import { SplitButton } from '../Common/SplitButton';
 import { useStore } from '../../store';
 import { parseAsciiInput, parseHexInput, parseDecInput, parseBinInput } from '../../utils/formatters';
 import { InputFormat } from '../../types';
+import { encodeCobs } from '../../utils/cobs';
+import { appendCrc } from '../../utils/crc';
 
 export function CommandInput() {
   const [inputValue, setInputValue] = useState('');
@@ -45,7 +47,9 @@ export function CommandInput() {
     sendSerialData, 
     appendLog,
     inputFormat,
-    setInputFormat 
+    setInputFormat,
+    cobsEnabled,
+    crcType
   } = useStore();
 
   const handleSend = async () => {
@@ -77,6 +81,19 @@ export function CommandInput() {
 
       if (dataToSend.length === 0) {
         return;
+      }
+
+      // Apply CRC and COBS encoding for HEX mode only
+      if (inputFormat === 'HEX') {
+        // First append CRC if enabled
+        if (crcType !== 'None') {
+          dataToSend = appendCrc(dataToSend, crcType);
+        }
+        
+        // Then apply COBS encoding if enabled (after CRC as per requirement)
+        if (cobsEnabled) {
+          dataToSend = encodeCobs(dataToSend);
+        }
       }
 
       await sendSerialData(dataToSend);

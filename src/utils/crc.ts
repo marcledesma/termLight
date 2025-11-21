@@ -147,3 +147,65 @@ export function appendCrc(bytes: Uint8Array, type: CrcType): Uint8Array {
 
   return bytes;
 }
+
+/**
+ * Validates CRC-8 checksum on data
+ * @param bytes - Data with CRC as last byte
+ * @returns Object with validation result and data without CRC
+ */
+export function validateCrc8(bytes: Uint8Array): { isValid: boolean; dataWithoutCrc: Uint8Array } {
+  if (bytes.length < 1) {
+    return { isValid: false, dataWithoutCrc: bytes };
+  }
+  
+  const dataWithoutCrc = bytes.slice(0, -1);
+  const receivedCrc = bytes[bytes.length - 1];
+  const calculatedCrc = calculateCrc8(dataWithoutCrc);
+  
+  return {
+    isValid: receivedCrc === calculatedCrc,
+    dataWithoutCrc
+  };
+}
+
+/**
+ * Validates CRC-16 checksum on data
+ * @param bytes - Data with CRC as last 2 bytes (Big Endian)
+ * @returns Object with validation result and data without CRC
+ */
+export function validateCrc16(bytes: Uint8Array): { isValid: boolean; dataWithoutCrc: Uint8Array } {
+  if (bytes.length < 2) {
+    return { isValid: false, dataWithoutCrc: bytes };
+  }
+  
+  const dataWithoutCrc = bytes.slice(0, -2);
+  const receivedCrc = (bytes[bytes.length - 2] << 8) | bytes[bytes.length - 1];
+  const calculatedCrc = calculateCrc16(dataWithoutCrc);
+  
+  return {
+    isValid: receivedCrc === calculatedCrc,
+    dataWithoutCrc
+  };
+}
+
+/**
+ * Validates CRC checksum on data based on type
+ * @param bytes - Data with CRC appended
+ * @param type - CRC type to validate
+ * @returns Object with validation result and data without CRC
+ */
+export function validateCrc(bytes: Uint8Array, type: CrcType): { isValid: boolean; dataWithoutCrc: Uint8Array } {
+  if (type === 'None') {
+    return { isValid: true, dataWithoutCrc: bytes };
+  }
+  
+  if (type === 'CRC-8') {
+    return validateCrc8(bytes);
+  }
+  
+  if (type === 'CRC-16') {
+    return validateCrc16(bytes);
+  }
+  
+  return { isValid: false, dataWithoutCrc: bytes };
+}

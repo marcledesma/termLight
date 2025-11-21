@@ -31,7 +31,7 @@
  */
 
 import { StateCreator } from 'zustand';
-import { DataFormat, InputFormat, LineEnding, Theme, FontSize, DisplayColors } from '../../types';
+import { DataFormat, InputFormat, LineEnding, Theme, FontSize, DisplayColors, CrcType } from '../../types';
 
 export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | 'command' | 'deleteCommand' | null;
 
@@ -56,6 +56,8 @@ export interface UiSlice {
   theme: Theme;
   fontSize: FontSize;
   displayColors: DisplayColors;
+  cobsEnabled: boolean;
+  crcType: CrcType;
 
   setActiveModal: (modal: ModalType) => void;
   setEditingCommandId: (id: string | null) => void;
@@ -71,6 +73,8 @@ export interface UiSlice {
   setTheme: (theme: Theme) => void;
   setFontSize: (size: FontSize) => void;
   setDisplayColors: (colors: DisplayColors) => void;
+  setCobsEnabled: (enabled: boolean) => void;
+  setCrcType: (type: CrcType) => void;
 }
 
 export const createUiSlice: StateCreator<UiSlice> = (set) => ({
@@ -90,6 +94,8 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
     receive: '#000000',
     send: '#0000FF',
   },
+  cobsEnabled: false,
+  crcType: 'None',
 
   setActiveModal: (activeModal) => set({ activeModal }),
   setEditingCommandId: (editingCommandId) => set({ editingCommandId }),
@@ -114,4 +120,6 @@ export const createUiSlice: StateCreator<UiSlice> = (set) => ({
   setTheme: (theme) => set({ theme }),
   setFontSize: (fontSize) => set({ fontSize }),
   setDisplayColors: (displayColors) => set({ displayColors }),
+  setCobsEnabled: (cobsEnabled) => set({ cobsEnabled }),
+  setCrcType: (crcType) => set({ crcType }),
 });

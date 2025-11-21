@@ -35,7 +35,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../Common/Button';
 import { Dropdown } from '../Common/Dropdown';
 import { useStore } from '../../store';
-import { Theme, FontSize } from '../../types';
+import { Theme, FontSize, CrcType } from '../../types';
 import { THEME_COLORS } from '../../utils/constants';
 
 export function ConfigModal() {
@@ -44,15 +44,21 @@ export function ConfigModal() {
     theme, 
     fontSize, 
     displayColors,
+    cobsEnabled,
+    crcType,
     setTheme, 
     setFontSize, 
-    setDisplayColors 
+    setDisplayColors,
+    setCobsEnabled,
+    setCrcType
   } = useStore();
 
   const [localTheme, setLocalTheme] = useState<Theme>(theme);
   const [localFontSize, setLocalFontSize] = useState<FontSize>(fontSize);
   const [localReceiveColor, setLocalReceiveColor] = useState(displayColors.receive);
   const [localSendColor, setLocalSendColor] = useState(displayColors.send);
+  const [localCobsEnabled, setLocalCobsEnabled] = useState(cobsEnabled);
+  const [localCrcType, setLocalCrcType] = useState<CrcType>(crcType);
 
   // Sync with store if store updates (though usually modal is closed)
   useEffect(() => {
@@ -60,7 +66,9 @@ export function ConfigModal() {
     setLocalFontSize(fontSize);
     setLocalReceiveColor(displayColors.receive);
     setLocalSendColor(displayColors.send);
-  }, [theme, fontSize, displayColors]);
+    setLocalCobsEnabled(cobsEnabled);
+    setLocalCrcType(crcType);
+  }, [theme, fontSize, displayColors, cobsEnabled, crcType]);
 
   // Automatically switch colors when theme changes, if they match the defaults
   const handleThemeChange = (newTheme: Theme) => {
@@ -89,6 +97,8 @@ export function ConfigModal() {
       receive: localReceiveColor,
       send: localSendColor
     });
+    setCobsEnabled(localCobsEnabled);
+    setCrcType(localCrcType);
     setActiveModal(null);
   };
 
@@ -144,6 +154,48 @@ export function ConfigModal() {
                   onChange={(e) => setLocalSendColor(e.target.value)}
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Send Data</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
+              HEX Mode Processing
+            </h3>
+            
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="cobsEnabled"
+                  checked={localCobsEnabled}
+                  onChange={(e) => setLocalCobsEnabled(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="cobsEnabled" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Enable COBS Autodecoding
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                Automatically decode/encode COBS framing when in HEX mode
+              </p>
+              
+              <div>
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  CRC Validation
+                </label>
+                <select
+                  value={localCrcType}
+                  onChange={(e) => setLocalCrcType(e.target.value as CrcType)}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="None">None</option>
+                  <option value="CRC-8">CRC-8/MAXIM-DOW</option>
+                  <option value="CRC-16">CRC-16/IBM-3740</option>
+                </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Validate received CRC and append CRC to sent data in HEX mode
+                </p>
               </div>
             </div>
           </div>

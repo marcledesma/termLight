@@ -79,3 +79,47 @@ export function encodeCobs(data: Uint8Array): Uint8Array {
   
   return encoded.slice(0, writeIndex);
 }
+
+/**
+ * Decodes a COBS-encoded byte array
+ * Expects data to end with 0x00 delimiter (will be stripped)
+ * 
+ * @param data - The COBS encoded data (with or without 0x00 delimiter)
+ * @returns Decoded data
+ * @throws Error if COBS decoding fails
+ */
+export function decodeCobs(data: Uint8Array): Uint8Array {
+  // Remove trailing 0x00 delimiter if present
+  let length = data.length;
+  if (length > 0 && data[length - 1] === 0x00) {
+    length--;
+  }
+  
+  if (length === 0) {
+    return new Uint8Array(0);
+  }
+  
+  const decoded = new Uint8Array(length); // Max size (will trim later)
+  let readIndex = 0;
+  let writeIndex = 0;
+  
+  while (readIndex < length) {
+    const code = data[readIndex++];
+    
+    if (code === 0) {
+      throw new Error('Invalid COBS encoding: unexpected zero byte');
+    }
+    
+    // Copy (code - 1) bytes
+    for (let i = 1; i < code && readIndex < length; i++) {
+      decoded[writeIndex++] = data[readIndex++];
+    }
+    
+    // Add zero byte if not at end and code < 0xFF
+    if (code < 0xFF && readIndex < length) {
+      decoded[writeIndex++] = 0x00;
+    }
+  }
+  
+  return decoded.slice(0, writeIndex);
+}

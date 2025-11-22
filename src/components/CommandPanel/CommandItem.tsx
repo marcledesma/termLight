@@ -84,6 +84,7 @@ export function CommandItem({ command }: CommandItemProps) {
       <div 
         className="flex items-center justify-center"
         style={{ width: `${commandColumnWidths.send}px` }}
+        onDoubleClick={(e) => e.stopPropagation()}
       >
         <Button 
           variant="icon" 

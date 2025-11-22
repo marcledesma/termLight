@@ -105,12 +105,18 @@ export function CommandHeader() {
       <div 
         className="flex px-2 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
       >
-        <div className="text-center flex items-center justify-center" style={{ width: `${commandColumnWidths.send}px` }}>
+        <div className="text-center flex items-center justify-center relative" style={{ width: `${commandColumnWidths.send}px` }}>
           Send
+          {/* Divider */}
+          <div className="absolute right-0 top-1 bottom-1 w-px bg-gray-300 dark:bg-gray-600" />
         </div>
         
         <div className="flex items-center relative" style={{ width: `${commandColumnWidths.name}px` }}>
           <div className="pl-2 flex-1">Name</div>
+          
+          {/* Divider */}
+          <div className="absolute right-0 top-1 bottom-1 w-px bg-gray-300 dark:bg-gray-600" />
+
           <div
             className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 flex items-center justify-center group z-10"
             onMouseDown={(e) => handleMouseDown('name', e)}

@@ -30,17 +30,16 @@
  * @date 2025-11-19
  */
 
-import { Plus, GripVertical } from 'lucide-react';
+import { GripVertical } from 'lucide-react';
 import { useRef } from 'react';
 import { CommandHeader } from './CommandHeader';
 import { CommandItem } from './CommandItem';
-import { Button } from '../Common/Button';
 import { useCommands } from '../../hooks/useCommands';
 import { useStore } from '../../store';
 
 export function CommandPanel() {
   const { commands, searchQuery } = useCommands();
-  const { setActiveModal, commandPanelWidth, setCommandPanelWidth } = useStore();
+  const { commandPanelWidth, setCommandPanelWidth } = useStore();
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
 
@@ -83,20 +82,6 @@ export function CommandPanel() {
             {searchQuery ? 'No commands found' : 'No commands yet'}
           </div>
         )}
-      </div>
-      <div className="p-2 border-t border-gray-300 dark:border-gray-700">
-        <Button 
-          variant="primary" 
-          size="sm" 
-          className="w-full"
-          onClick={() => {
-            useStore.getState().setEditingCommandId(null);
-            setActiveModal('command');
-          }}
-        >
-          <Plus size={16} className="mr-1" />
-          Add New Command
-        </Button>
       </div>
     </div>
   );

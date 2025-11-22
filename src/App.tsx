@@ -10,8 +10,7 @@
  * Please review, test, and validate all code before use in production environments.
  * 
  * Description: A serial communication tool for sending, receiving, 
- * and managing commands via COM ports, similar to Docklight with 
- * Arduino-style direct command functionality.
+ * and managing commands via COM ports.
  * 
  * GitHub: https://github.com/marcledesma/termLight
  * 
@@ -39,7 +38,7 @@ import { Toolbar } from './components/Toolbar/Toolbar';
 import { StatusBar } from './components/StatusBar/StatusBar';
 import { MainPanel } from './components/MainPanel/MainPanel';
 import { CommandPanel } from './components/CommandPanel/CommandPanel';
-import { Documentation } from './components/Documentation/Documentation';
+// import { Documentation } from './components/Documentation/Documentation';
 import { CommSettingsModal } from './components/Modals/CommSettingsModal';
 import { ConfigModal } from './components/Modals/ConfigModal';
 import { AboutModal } from './components/Modals/AboutModal';
@@ -102,7 +101,7 @@ function App() {
         <div className="flex flex-1 overflow-hidden">
           <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
             <MainPanel />
-            <Documentation />
+            {/* <Documentation /> */}
           </div>
           <div 
             className="border-l border-gray-300 dark:border-gray-700"

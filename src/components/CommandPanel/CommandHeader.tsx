@@ -30,14 +30,15 @@
  * @date 2025-11-19
  */
 
-import { Search, GripVertical } from 'lucide-react';
+import { Search, GripVertical, Plus } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { Dropdown } from '../Common/Dropdown';
 import { Input } from '../Common/Input';
+import { Button } from '../Common/Button';
 import { useStore } from '../../store';
 
 export function CommandHeader() {
-  const { sortBy, setSortBy, searchQuery, setSearchQuery, commandColumnWidths, setCommandColumnWidths } = useStore();
+  const { sortBy, setSortBy, searchQuery, setSearchQuery, commandColumnWidths, setCommandColumnWidths, setActiveModal } = useStore();
   const [_resizing, setResizing] = useState<'name' | null>(null);
   const startXRef = useRef(0);
   const startWidthsRef = useRef({ name: 0, sequence: 0 });
@@ -76,6 +77,22 @@ export function CommandHeader() {
   return (
     <div className="flex flex-col border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
       <div className="p-2 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+            <span className="font-semibold text-sm text-gray-700 dark:text-gray-300">Commands</span>
+             <Button 
+              variant="primary" 
+              size="sm" 
+              className="text-xs px-3 h-7"
+              onClick={() => {
+                useStore.getState().setEditingCommandId(null);
+                setActiveModal('command');
+              }}
+              title="Add New Command"
+            >
+              <Plus size={14} className="mr-1" />
+              Add New Command
+            </Button>
+        </div>
         <div className="flex gap-2">
           <div className="w-1/3 min-w-[120px]">
             <Dropdown

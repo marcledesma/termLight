@@ -35,7 +35,7 @@ import { Project, Command, ReceiveCommand } from '../types';
 import { SerialConfig } from '../types/serial';
 
 // DochLight backend types (matching Rust structures)
-interface DochlightProject {
+interface ProjectData {
   version: number;
   comm_settings: {
     params: number[];
@@ -73,14 +73,14 @@ export const projectService = {
    */
   saveProject: async (project: Project): Promise<string | null> => {
     try {
-      const dochlightProject = projectService.toDochlightFormat(project);
-      const result = await invoke<string | null>('save_project_dialog', {
-        project: dochlightProject,
+      const projectData = projectService.toProjectData(project);
+      const savedPath = await invoke<string | null>('save_project_dialog', {
+        project: projectData,
       });
-      return result;
+      return savedPath;
     } catch (error) {
       console.error('Failed to save project:', error);
-      throw error;
+      return null;
     }
   },
 
@@ -89,9 +89,9 @@ export const projectService = {
    */
   saveProjectToPath: async (project: Project, filePath: string): Promise<void> => {
     try {
-      const dochlightProject = projectService.toDochlightFormat(project);
+      const projectData = projectService.toProjectData(project);
       await invoke('save_project', {
-        project: dochlightProject,
+        project: projectData,
         filePath,
       });
     } catch (error) {
@@ -105,14 +105,14 @@ export const projectService = {
    */
   loadProject: async (): Promise<{ path: string; project: Project } | null> => {
     try {
-      const result = await invoke<[string, DochlightProject] | null>('load_project_dialog');
+      const result = await invoke<[string, ProjectData] | null>('load_project_dialog');
       
       if (!result) {
         return null;
       }
 
-      const [path, dochlightProject] = result;
-      const project = projectService.fromDochlightFormat(dochlightProject, path);
+      const [path, projectData] = result;
+      const project = projectService.fromProjectData(projectData, path);
       
       return { path, project };
     } catch (error) {
@@ -126,11 +126,11 @@ export const projectService = {
    */
   loadProjectFromPath: async (filePath: string): Promise<Project> => {
     try {
-      const dochlightProject = await invoke<DochlightProject>('load_project', {
+      const projectData = await invoke<ProjectData>('load_project', {
         filePath,
       });
       
-      return projectService.fromDochlightFormat(dochlightProject, filePath);
+      return projectService.fromProjectData(projectData, filePath);
     } catch (error) {
       console.error('Failed to load project from path:', error);
       throw error;
@@ -164,24 +164,24 @@ export const projectService = {
   },
 
   /**
-   * Convert Project to DochLight format
+   * Convert Project to backend format
    */
-  toDochlightFormat: (project: Project): DochlightProject => {
+  toProjectData: (project: Project): ProjectData => {
     return {
-      version: project.version,
+      version: project.version || 0,
       comm_settings: {
-        params: project.commSettings,
+        params: project.commSettings || [],
       },
-      comm_display: project.commDisplay,
-      comm_channels: project.commChannels,
-      send_commands: project.commands.map((cmd, index) => ({
-        index,
+      comm_display: project.commDisplay || 0,
+      comm_channels: project.commChannels || [],
+      send_commands: project.commands.map((cmd, idx) => ({
+        index: idx,
         name: cmd.name,
         hex_data: cmd.sequence,
-        repetition_mode: cmd.repetitionMode,
-        color_index: cmd.colorIndex,
+        repetition_mode: cmd.repetitionMode || 0,
+        color_index: cmd.colorIndex || 0,
       })),
-      receive_commands: project.receiveCommands.map((cmd) => ({
+      receive_commands: (project.receiveCommands || []).map((cmd) => ({
         index: cmd.index,
         name: cmd.name,
         hex_data: cmd.hex_data,
@@ -198,14 +198,14 @@ export const projectService = {
   },
 
   /**
-   * Convert DochLight format to Project
+   * Convert backend format to Project
    */
-  fromDochlightFormat: (dochlight: DochlightProject, path: string): Project => {
+  fromProjectData: (data: ProjectData, path: string): Project => {
     const fileName = path.split(/[/\\]/).pop() || 'Untitled';
     const projectName = fileName.replace(/\.ptp$/, '');
 
     // Convert SEND commands to Command objects
-    const commands: Command[] = dochlight.send_commands.map((cmd) => ({
+    const commands: Command[] = data.send_commands.map((cmd) => ({
       id: crypto.randomUUID(),
       name: cmd.name,
       sequence: cmd.hex_data,
@@ -216,7 +216,7 @@ export const projectService = {
     }));
 
     // Convert RECEIVE commands
-    const receiveCommands: ReceiveCommand[] = dochlight.receive_commands.map((cmd) => ({
+    const receiveCommands: ReceiveCommand[] = data.receive_commands.map((cmd) => ({
       index: cmd.index,
       name: cmd.name,
       hex_data: cmd.hex_data,
@@ -228,11 +228,12 @@ export const projectService = {
       param4: cmd.param4,
       param5: cmd.param5,
       param6: cmd.param6,
+      // ... other parameters as needed
     }));
 
     // Parse serial config from comm_settings (if valid)
     const serialConfig: SerialConfig = projectService.parseSerialConfig(
-      dochlight.comm_settings.params
+      data.comm_settings.params
     );
 
     return {
@@ -244,10 +245,10 @@ export const projectService = {
       serialConfig,
       commands,
       receiveCommands,
-      version: dochlight.version,
-      commSettings: dochlight.comm_settings.params,
-      commDisplay: dochlight.comm_display,
-      commChannels: dochlight.comm_channels,
+      version: data.version,
+      commSettings: data.comm_settings.params,
+      commDisplay: data.comm_display,
+      commChannels: data.comm_channels,
     };
   },
 

@@ -10,8 +10,7 @@
  * Please review, test, and validate all code before use in production environments.
  * 
  * Description: A serial communication tool for sending, receiving, 
- * and managing commands via COM ports, similar to Docklight with 
- * Arduino-style direct command functionality.
+ * and managing commands via COM ports.
  * 
  * GitHub: https://github.com/marcledesma/termLight
  * 

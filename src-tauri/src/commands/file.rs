@@ -10,8 +10,7 @@
  * Please review, test, and validate all code before use in production environments.
  * 
  * Description: A serial communication tool for sending, receiving, 
- * and managing commands via COM ports, similar to Docklight with 
- * Arduino-style direct command functionality.
+ * and managing commands via COM ports.
  * 
  * GitHub: https://github.com/marcledesma/termLight
  * 
@@ -39,7 +38,7 @@ use std::path::Path;
 // ============================================================================
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DochlightProject {
+pub struct ProjectData {
     pub version: i32,
     pub comm_settings: CommSettings,
     pub comm_display: i32,
@@ -81,14 +80,14 @@ pub struct ReceiveCommand {
 // Parser Implementation
 // ============================================================================
 
-pub fn parse_dochlight_file(path: &Path) -> Result<DochlightProject, String> {
+pub fn parse_project_file(path: &Path) -> Result<ProjectData, String> {
     let content = fs::read_to_string(path)
         .map_err(|e| format!("Failed to read file: {}", e))?;
     
     let lines: Vec<&str> = content.lines().collect();
     let mut idx = 0;
     
-    let mut project = DochlightProject {
+    let mut project = ProjectData {
         version: 0,
         comm_settings: CommSettings { params: vec![] },
         comm_display: 0,
@@ -225,7 +224,7 @@ pub fn parse_dochlight_file(path: &Path) -> Result<DochlightProject, String> {
 // Serializer Implementation
 // ============================================================================
 
-pub fn write_dochlight_file(project: &DochlightProject, path: &Path) -> Result<(), String> {
+pub fn write_project_file(project: &ProjectData, path: &Path) -> Result<(), String> {
     let mut output = String::new();
     
     // VERSION
@@ -284,32 +283,32 @@ pub fn write_dochlight_file(project: &DochlightProject, path: &Path) -> Result<(
 // ============================================================================
 
 #[tauri::command]
-pub async fn save_project(project: DochlightProject, file_path: String) -> Result<(), String> {
+pub async fn save_project(project: ProjectData, file_path: String) -> Result<(), String> {
     let path = Path::new(&file_path);
-    write_dochlight_file(&project, path)
+    write_project_file(&project, path)
 }
 
 #[tauri::command]
-pub async fn load_project(file_path: String) -> Result<DochlightProject, String> {
+pub async fn load_project(file_path: String) -> Result<ProjectData, String> {
     let path = Path::new(&file_path);
-    parse_dochlight_file(path)
+    parse_project_file(path)
 }
 
 #[tauri::command]
 pub async fn save_project_dialog(
     app: tauri::AppHandle,
-    project: DochlightProject,
+    project: ProjectData,
 ) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::{DialogExt, FilePath};
     
     let file_path = app.dialog()
         .file()
-        .add_filter("DochLight Project", &["ptp"])
+        .add_filter("termLight Project", &["ptp"])
         .set_title("Save Project")
         .blocking_save_file();
     
     if let Some(FilePath::Path(path)) = file_path {
-        write_dochlight_file(&project, &path)?;
+        write_project_file(&project, &path)?;
         Ok(Some(path.to_string_lossy().to_string()))
     } else {
         Ok(None)
@@ -319,17 +318,17 @@ pub async fn save_project_dialog(
 #[tauri::command]
 pub async fn load_project_dialog(
     app: tauri::AppHandle,
-    ) -> Result<Option<(String, DochlightProject)>, String> {
+    ) -> Result<Option<(String, ProjectData)>, String> {
     use tauri_plugin_dialog::{DialogExt, FilePath};
     
     let file_path = app.dialog()
         .file()
-        .add_filter("DochLight Project", &["ptp"])
+        .add_filter("termLight Project", &["ptp"])
         .set_title("Open Project")
         .blocking_pick_file();
     
     if let Some(FilePath::Path(path)) = file_path {
-        let project = parse_dochlight_file(&path)?;
+        let project = parse_project_file(&path)?;
         Ok(Some((path.to_string_lossy().to_string(), project)))
     } else {
         Ok(None)
@@ -343,7 +342,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     #[test]
-    fn test_parse_dochlight_file() {
+    fn test_parse_project_file() {
         let content = "VERSION
 7
 
@@ -383,7 +382,7 @@ Pong
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "{}", content).unwrap();
         
-        let result = parse_dochlight_file(file.path());
+        let result = parse_project_file(file.path());
         assert!(result.is_ok());
         
         let project = result.unwrap();

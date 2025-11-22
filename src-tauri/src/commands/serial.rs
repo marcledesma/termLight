@@ -10,8 +10,7 @@
  * Please review, test, and validate all code before use in production environments.
  * 
  * Description: A serial communication tool for sending, receiving, 
- * and managing commands via COM ports, similar to Docklight with 
- * Arduino-style direct command functionality.
+ * and managing commands via COM ports.
  * 
  * GitHub: https://github.com/marcledesma/termLight
  * 
@@ -32,7 +31,7 @@
 
 use crate::serial::state::SerialState;
 use serde::{Deserialize, Serialize};
-use serialport::{DataBits, Parity, StopBits, SerialPort};
+use serialport::{DataBits, Parity, StopBits};
 use std::io::{Read, Write};
 use std::sync::atomic::Ordering;
 use std::time::Duration;
@@ -105,7 +104,7 @@ pub fn open_port(
         _ => return Err("Invalid parity".to_string()),
     };
 
-    let mut port = serialport::new(&port_name, baud_rate)
+    let port = serialport::new(&port_name, baud_rate)
         .data_bits(d_bits)
         .stop_bits(s_bits)
         .parity(p_parity)

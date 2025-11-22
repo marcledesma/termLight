@@ -34,7 +34,7 @@ export const BAUD_RATES = [300, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115
 export const DATA_BITS = [5, 6, 7, 8] as const;
 export const STOP_BITS = [1, 1.5, 2] as const;
 export const PARITY_OPTIONS = ['None', 'Even', 'Odd'] as const;
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.1.1';
 
 export const THEME_COLORS = {
   Light: {

@@ -52,7 +52,7 @@ export function AboutModal() {
         <div className="p-6 space-y-4">
           <div className="text-center">
             <h3 className="text-2xl font-bold text-gray-800 dark:text-white">termLight</h3>
-            <p className="text-gray-600 dark:text-gray-400">Version 0.1.0</p>
+            <p className="text-gray-600 dark:text-gray-400">Version 0.1.1</p>
           </div>
           <div className="text-sm text-gray-700 dark:text-gray-300 space-y-2">
             <p>

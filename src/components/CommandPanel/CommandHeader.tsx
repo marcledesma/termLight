@@ -38,7 +38,7 @@ import { useStore } from '../../store';
 
 export function CommandHeader() {
   const { sortBy, setSortBy, searchQuery, setSearchQuery, commandColumnWidths, setCommandColumnWidths } = useStore();
-  const [resizing, setResizing] = useState<'name' | null>(null);
+  const [_resizing, setResizing] = useState<'name' | null>(null);
   const startXRef = useRef(0);
   const startWidthsRef = useRef({ name: 0, sequence: 0 });
 

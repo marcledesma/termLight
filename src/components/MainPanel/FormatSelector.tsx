@@ -31,14 +31,14 @@
  */
 
 import clsx from 'clsx';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Trash2 } from 'lucide-react';
 import { useStore } from '../../store';
 import { DataFormat } from '../../types';
 
 const formats: DataFormat[] = ['Serial Monitor(ASCII)', 'HEX', 'DEC', 'BIN'];
 
 export function FormatSelector() {
-  const { dataFormat, setDataFormat, autoScroll, setAutoScroll } = useStore();
+  const { dataFormat, setDataFormat, autoScroll, setAutoScroll, clearLog } = useStore();
 
   return (
     <div className="flex items-center justify-between border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 pr-2 relative z-10 shrink-0">
@@ -63,19 +63,30 @@ export function FormatSelector() {
         ))}
       </div>
 
-      <button
-        onClick={() => setAutoScroll(!autoScroll)}
-        className={clsx(
-          "flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-colors border",
-          autoScroll
-            ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800"
-            : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
-        )}
-        title="Toggle Auto-scroll"
-      >
-        <ArrowDown size={14} />
-        <span>Auto-scroll</span>
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setAutoScroll(!autoScroll)}
+          className={clsx(
+            "flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-colors border",
+            autoScroll
+              ? "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800"
+              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
+          )}
+          title="Toggle Auto-scroll"
+        >
+          <ArrowDown size={14} />
+          <span>Auto-scroll</span>
+        </button>
+
+        <button
+          onClick={clearLog}
+          className="flex items-center gap-2 px-3 py-1 rounded text-xs font-medium transition-colors border bg-white text-gray-600 border-gray-300 hover:bg-gray-50 hover:text-red-600 hover:border-red-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:text-red-400 dark:hover:border-red-800"
+          title="Clear Terminal"
+        >
+          <Trash2 size={14} />
+          <span>Clear</span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export function DataDisplay() {
 
   const renderData = (data: number[]): { formatted: string; crcValid: boolean | null } => {
     // Convert number[] back to Uint8Array for formatting
-    let uint8Data = new Uint8Array(data);
+    let uint8Data: any = new Uint8Array(data);
     let crcValid: boolean | null = null;
     
     // Apply COBS decoding and CRC validation only for HEX mode
@@ -58,14 +58,14 @@ export function DataDisplay() {
       try {
         // First, decode COBS if enabled
         if (cobsEnabled) {
-          uint8Data = decodeCobs(uint8Data);
+          uint8Data = decodeCobs(uint8Data) as Uint8Array;
         }
         
         // Then, validate and strip CRC if enabled
         if (crcType !== 'None') {
           const validation = validateCrc(uint8Data, crcType);
           crcValid = validation.isValid;
-          uint8Data = validation.dataWithoutCrc;
+          uint8Data = validation.dataWithoutCrc as Uint8Array;
         }
       } catch (error) {
         console.error('Error processing HEX data:', error);

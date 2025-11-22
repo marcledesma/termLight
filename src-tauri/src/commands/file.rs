@@ -31,7 +31,8 @@
 
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use tauri::{Manager, path::BaseDirectory};
 
 // ============================================================================
 // Data Structures
@@ -75,6 +76,15 @@ pub struct ReceiveCommand {
     pub param5: i32,
     pub param6: i32,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RecentProject {
+    pub name: String,
+    pub path: String,
+    pub last_modified: String, // ISO string
+}
+
+const RECENT_FILES_JSON: &str = "recent_projects.json";
 
 // ============================================================================
 // Parser Implementation
@@ -279,19 +289,46 @@ pub fn write_project_file(project: &ProjectData, path: &Path) -> Result<(), Stri
 }
 
 // ============================================================================
+// Helper Functions
+// ============================================================================
+
+fn get_recent_files_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let config_dir = app.path().app_config_dir()
+        .map_err(|e| format!("Failed to get app config dir: {}", e))?;
+    
+    if !config_dir.exists() {
+        fs::create_dir_all(&config_dir)
+            .map_err(|e| format!("Failed to create config dir: {}", e))?;
+    }
+    
+    Ok(config_dir.join(RECENT_FILES_JSON))
+}
+
+// ============================================================================
 // Tauri Commands
 // ============================================================================
 
 #[tauri::command]
-pub async fn save_project(project: ProjectData, file_path: String) -> Result<(), String> {
+pub async fn save_project(
+    app: tauri::AppHandle,
+    project: ProjectData, 
+    file_path: String
+) -> Result<(), String> {
     let path = Path::new(&file_path);
-    write_project_file(&project, path)
+    write_project_file(&project, path)?;
+    add_recent_project(app, file_path).await?;
+    Ok(())
 }
 
 #[tauri::command]
-pub async fn load_project(file_path: String) -> Result<ProjectData, String> {
+pub async fn load_project(
+    app: tauri::AppHandle,
+    file_path: String
+) -> Result<ProjectData, String> {
     let path = Path::new(&file_path);
-    parse_project_file(path)
+    let project = parse_project_file(path)?;
+    add_recent_project(app, file_path).await?;
+    Ok(project)
 }
 
 #[tauri::command]
@@ -309,7 +346,9 @@ pub async fn save_project_dialog(
     
     if let Some(FilePath::Path(path)) = file_path {
         write_project_file(&project, &path)?;
-        Ok(Some(path.to_string_lossy().to_string()))
+        let path_str = path.to_string_lossy().to_string();
+        add_recent_project(app, path_str.clone()).await?;
+        Ok(Some(path_str))
     } else {
         Ok(None)
     }
@@ -318,7 +357,7 @@ pub async fn save_project_dialog(
 #[tauri::command]
 pub async fn load_project_dialog(
     app: tauri::AppHandle,
-    ) -> Result<Option<(String, ProjectData)>, String> {
+) -> Result<Option<(String, ProjectData)>, String> {
     use tauri_plugin_dialog::{DialogExt, FilePath};
     
     let file_path = app.dialog()
@@ -329,10 +368,81 @@ pub async fn load_project_dialog(
     
     if let Some(FilePath::Path(path)) = file_path {
         let project = parse_project_file(&path)?;
-        Ok(Some((path.to_string_lossy().to_string(), project)))
+        let path_str = path.to_string_lossy().to_string();
+        add_recent_project(app, path_str.clone()).await?;
+        Ok(Some((path_str, project)))
     } else {
         Ok(None)
     }
+}
+
+#[tauri::command]
+pub async fn get_recent_projects(app: tauri::AppHandle) -> Result<Vec<RecentProject>, String> {
+    let path = get_recent_files_path(&app)?;
+    
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    
+    let content = fs::read_to_string(path)
+        .map_err(|e| format!("Failed to read recent projects file: {}", e))?;
+        
+    let projects: Vec<RecentProject> = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse recent projects: {}", e))?;
+        
+    Ok(projects)
+}
+
+#[tauri::command]
+pub async fn add_recent_project(app: tauri::AppHandle, path: String) -> Result<Vec<RecentProject>, String> {
+    let json_path = get_recent_files_path(&app)?;
+    
+    let mut projects: Vec<RecentProject> = if json_path.exists() {
+        let content = fs::read_to_string(&json_path)
+            .map_err(|e| format!("Failed to read recent projects file: {}", e))?;
+        serde_json::from_str(&content).unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    
+    // Remove existing entry if present
+    projects.retain(|p| p.path != path);
+    
+    // Add new entry to the top
+    let name = Path::new(&path)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("Untitled")
+        .to_string();
+        
+    projects.insert(0, RecentProject {
+        name,
+        path,
+        last_modified: chrono::Local::now().to_rfc3339(),
+    });
+    
+    // Keep only top 10
+    if projects.len() > 10 {
+        projects.truncate(10);
+    }
+    
+    let content = serde_json::to_string_pretty(&projects)
+        .map_err(|e| format!("Failed to serialize recent projects: {}", e))?;
+        
+    fs::write(json_path, content)
+        .map_err(|e| format!("Failed to write recent projects file: {}", e))?;
+        
+    Ok(projects)
+}
+
+#[tauri::command]
+pub async fn clear_recent_projects(app: tauri::AppHandle) -> Result<(), String> {
+    let path = get_recent_files_path(&app)?;
+    if path.exists() {
+        fs::remove_file(path)
+            .map_err(|e| format!("Failed to delete recent projects file: {}", e))?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]

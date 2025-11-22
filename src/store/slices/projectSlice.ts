@@ -44,6 +44,7 @@ export interface ProjectSlice {
   loadProject: () => Promise<void>;
   saveProject: () => Promise<void>;
   newProject: () => void;
+  initRecentProjects: () => Promise<void>;
 }
 
 export const createProjectSlice: StateCreator<
@@ -55,12 +56,21 @@ export const createProjectSlice: StateCreator<
   setCurrentProject: (currentProject) => set({ currentProject, isDirty: false }),
   setRecentProjects: (recentProjects) => set({ recentProjects }),
   setIsDirty: (isDirty) => set({ isDirty }),
+
+  initRecentProjects: async () => {
+    try {
+      const recentProjects = await projectService.getRecentProjects();
+      set({ recentProjects });
+    } catch (error) {
+      console.error('Failed to load recent projects:', error);
+    }
+  },
   
   loadProject: async () => {
     try {
       const result = await projectService.loadProject();
       if (result) {
-        const { path, project } = result;
+        const { project } = result;
         set({ currentProject: project, isDirty: false });
         
         // Update commands in the command slice
@@ -69,20 +79,8 @@ export const createProjectSlice: StateCreator<
           state.setCommands(project.commands);
         }
         
-        // Add to recent projects
-        const metadata: ProjectMetadata = {
-          name: project.metadata.name,
-          path,
-          lastModified: new Date(),
-        };
-        
-        const state2 = get();
-        const recentProjects = [
-          metadata,
-          ...state2.recentProjects.filter((p) => p.path !== path),
-        ].slice(0, 10);
-        
-        set({ recentProjects });
+        // Refresh recent projects from backend
+        await state.initRecentProjects();
       }
     } catch (error) {
       console.error('Failed to load project:', error);
@@ -108,6 +106,8 @@ export const createProjectSlice: StateCreator<
           newProject.metadata.path = savedPath;
           newProject.metadata.name = savedPath.split(/[/\\]/).pop()?.replace(/\.ptp$/, '') || 'Untitled';
           set({ currentProject: newProject, isDirty: false });
+          // Refresh recent projects
+          await state.initRecentProjects();
         }
       } else {
         // Update current project with latest commands
@@ -122,13 +122,17 @@ export const createProjectSlice: StateCreator<
         
         if (currentProject.metadata.path) {
           await projectService.saveProjectToPath(updatedProject, currentProject.metadata.path);
+          // Explicitly add to recent projects (or refresh if backend handles it on save)
+          // Backend save_project handles it, so just refresh
           set({ currentProject: updatedProject, isDirty: false });
+          await state.initRecentProjects();
         } else {
           const savedPath = await projectService.saveProject(updatedProject);
           if (savedPath) {
             updatedProject.metadata.path = savedPath;
             updatedProject.metadata.name = savedPath.split(/[/\\]/).pop()?.replace(/\.ptp$/, '') || 'Untitled';
             set({ currentProject: updatedProject, isDirty: false });
+            await state.initRecentProjects();
           }
         }
       }

@@ -53,6 +53,9 @@ fn main() {
             commands::file::load_project,
             commands::file::save_project_dialog,
             commands::file::load_project_dialog,
+            commands::file::get_recent_projects,
+            commands::file::add_recent_project,
+            commands::file::clear_recent_projects,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");

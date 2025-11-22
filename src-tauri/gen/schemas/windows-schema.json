@@ -387,10 +387,10 @@
       "description": "Permission identifier",
       "oneOf": [
         {
-          "description": "Allows all file operations commands\n#### This permission set includes:\n\n- `allow-save-project`\n- `allow-load-project`\n- `allow-save-project-dialog`\n- `allow-load-project-dialog`",
+          "description": "Allows all file operations commands\n#### This permission set includes:\n\n- `allow-save-project`\n- `allow-load-project`\n- `allow-save-project-dialog`\n- `allow-load-project-dialog`\n- `allow-get-recent-projects`\n- `allow-add-recent-project`\n- `allow-clear-recent-projects`",
           "type": "string",
           "const": "allow-file-commands",
-          "markdownDescription": "Allows all file operations commands\n#### This permission set includes:\n\n- `allow-save-project`\n- `allow-load-project`\n- `allow-save-project-dialog`\n- `allow-load-project-dialog`"
+          "markdownDescription": "Allows all file operations commands\n#### This permission set includes:\n\n- `allow-save-project`\n- `allow-load-project`\n- `allow-save-project-dialog`\n- `allow-load-project-dialog`\n- `allow-get-recent-projects`\n- `allow-add-recent-project`\n- `allow-clear-recent-projects`"
         },
         {
           "description": "Allows all serial port commands\n#### This permission set includes:\n\n- `allow-list-ports`\n- `allow-open-port`\n- `allow-close-port`\n- `allow-send-data`",
@@ -399,10 +399,28 @@
           "markdownDescription": "Allows all serial port commands\n#### This permission set includes:\n\n- `allow-list-ports`\n- `allow-open-port`\n- `allow-close-port`\n- `allow-send-data`"
         },
         {
+          "description": "Allows adding a recent project",
+          "type": "string",
+          "const": "allow-add-recent-project",
+          "markdownDescription": "Allows adding a recent project"
+        },
+        {
+          "description": "Allows clearing recent projects",
+          "type": "string",
+          "const": "allow-clear-recent-projects",
+          "markdownDescription": "Allows clearing recent projects"
+        },
+        {
           "description": "Allows closing a serial port",
           "type": "string",
           "const": "allow-close-port",
           "markdownDescription": "Allows closing a serial port"
+        },
+        {
+          "description": "Allows getting recent projects",
+          "type": "string",
+          "const": "allow-get-recent-projects",
+          "markdownDescription": "Allows getting recent projects"
         },
         {
           "description": "Allows listing available serial ports",

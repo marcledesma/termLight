@@ -40,6 +40,21 @@ identifier = "allow-load-project-dialog"
 description = "Allows loading a project with file dialog"
 commands.allow = ["load_project_dialog"]
 
+[[permission]]
+identifier = "allow-get-recent-projects"
+description = "Allows getting recent projects"
+commands.allow = ["get_recent_projects"]
+
+[[permission]]
+identifier = "allow-add-recent-project"
+description = "Allows adding a recent project"
+commands.allow = ["add_recent_project"]
+
+[[permission]]
+identifier = "allow-clear-recent-projects"
+description = "Allows clearing recent projects"
+commands.allow = ["clear_recent_projects"]
+
 [[set]]
 identifier = "allow-serial-commands"
 description = "Allows all serial port commands"
@@ -57,7 +72,10 @@ permissions = [
   "allow-save-project",
   "allow-load-project",
   "allow-save-project-dialog",
-  "allow-load-project-dialog"
+  "allow-load-project-dialog",
+  "allow-get-recent-projects",
+  "allow-add-recent-project",
+  "allow-clear-recent-projects"
 ]
 
 

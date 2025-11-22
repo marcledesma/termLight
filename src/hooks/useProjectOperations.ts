@@ -41,7 +41,8 @@ export function useProjectOperations() {
     saveProject, 
     isDirty, 
     setCurrentProject, 
-    setCommands 
+    setCommands,
+    initRecentProjects
   } = useStore();
 
   const handleNew = async () => {
@@ -85,6 +86,7 @@ export function useProjectOperations() {
       const project = await projectService.loadProjectFromPath(path);
       setCurrentProject(project);
       setCommands(project.commands);
+      await initRecentProjects();
     } catch (error) {
       console.error('Failed to load recent project:', error);
       alert('Failed to load project: ' + (error as Error).message);

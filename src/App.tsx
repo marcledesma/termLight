@@ -52,6 +52,7 @@ function App() {
   const activeModal = useStore((state) => state.activeModal);
   const editingCommandId = useStore((state) => state.editingCommandId);
   const refreshPorts = useStore((state) => state.refreshPorts);
+  const initRecentProjects = useStore((state) => state.initRecentProjects);
   const appendLog = useStore((state) => state.appendLog);
   const theme = useStore((state) => state.theme);
   const commandPanelWidth = useStore((state) => state.commandPanelWidth);
@@ -72,6 +73,8 @@ function App() {
   useEffect(() => {
     // Initial port fetch
     refreshPorts();
+    // Load recent projects
+    initRecentProjects();
 
     // Listen for incoming data
     console.log("Initializing data listener in App");
@@ -90,7 +93,7 @@ function App() {
         fn();
       });
     };
-  }, [refreshPorts, appendLog]);
+  }, [refreshPorts, appendLog, initRecentProjects]);
 
   return (
     <div className={clsx("flex flex-col h-screen", { "dark": theme === "Dark" })}>

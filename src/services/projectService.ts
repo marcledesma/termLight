@@ -31,7 +31,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { Project, Command, ReceiveCommand } from '../types';
+import { Project, Command, ReceiveCommand, ProjectMetadata } from '../types';
 import { SerialConfig } from '../types/serial';
 
 // DochLight backend types (matching Rust structures)
@@ -267,4 +267,33 @@ export const projectService = {
       stopBits: 1,
     };
   },
+
+  /**
+   * Get recent projects from persistent storage
+   */
+  getRecentProjects: async (): Promise<ProjectMetadata[]> => {
+    try {
+      const projects = await invoke<any[]>('get_recent_projects');
+      return projects.map(p => ({
+        name: p.name,
+        path: p.path,
+        lastModified: new Date(p.last_modified)
+      }));
+    } catch (error) {
+      console.error('Failed to get recent projects:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Clear recent projects from persistent storage
+   */
+  clearRecentProjects: async (): Promise<void> => {
+    try {
+      await invoke('clear_recent_projects');
+    } catch (error) {
+      console.error('Failed to clear recent projects:', error);
+      throw error;
+    }
+  }
 };

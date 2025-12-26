@@ -10,7 +10,11 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["nsis"],
+    "targets": ["msi", "nsis"],
+    "publisher": "Marc Ledesma",
+    "copyright": "Copyright (c) 2025 Marc Ledesma",
+    "shortDescription": "Serial communication tool",
+    "longDescription": "A serial communication tool for sending, receiving, and managing commands via COM ports",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -21,10 +25,7 @@
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
-      "timestampUrl": "",
-      "nsis": {
-        "installMode": "currentUser"
-      }
+      "timestampUrl": ""
     }
   },
   "app": {

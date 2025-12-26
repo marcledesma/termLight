@@ -404,16 +404,26 @@ pub fn write_project_file(project: &ProjectData, path: &Path) -> Result<(), Stri
 // Helper Functions
 // ============================================================================
 
+/// Get the path to the recent projects JSON file.
+/// Uses %LOCALAPPDATA% instead of %APPDATA%\Roaming to reduce antivirus suspicion.
+/// Directory is created lazily when first write occurs, not at startup.
 fn get_recent_files_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
-    let config_dir = app.path().app_config_dir()
-        .map_err(|e| format!("Failed to get app config dir: {}", e))?;
+    let local_data_dir = app.path().app_local_data_dir()
+        .map_err(|e| format!("Failed to get app local data dir: {}", e))?;
     
-    if !config_dir.exists() {
-        fs::create_dir_all(&config_dir)
-            .map_err(|e| format!("Failed to create config dir: {}", e))?;
+    Ok(local_data_dir.join(RECENT_FILES_JSON))
+}
+
+/// Ensures the directory for recent projects exists before writing to it.
+/// This implements lazy initialization - directory is only created when needed.
+fn ensure_recent_files_dir(path: &PathBuf) -> Result<(), String> {
+    if let Some(parent) = path.parent() {
+        if !parent.exists() {
+            fs::create_dir_all(parent)
+                .map_err(|e| format!("Failed to create recent projects directory: {}", e))?;
+        }
     }
-    
-    Ok(config_dir.join(RECENT_FILES_JSON))
+    Ok(())
 }
 
 // ============================================================================
@@ -540,7 +550,10 @@ pub async fn add_recent_project(app: tauri::AppHandle, path: String) -> Result<V
     
     let content = serde_json::to_string_pretty(&projects)
         .map_err(|e| format!("Failed to serialize recent projects: {}", e))?;
-        
+    
+    // Lazy initialization: create directory only when first write occurs
+    ensure_recent_files_dir(&json_path)?;
+    
     fs::write(json_path, content)
         .map_err(|e| format!("Failed to write recent projects file: {}", e))?;
         

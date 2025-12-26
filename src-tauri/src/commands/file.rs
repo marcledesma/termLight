@@ -32,7 +32,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri::{Manager, path::BaseDirectory};
+use tauri::Manager;
 
 // ============================================================================
 // Data Structures
@@ -46,11 +46,15 @@ pub struct ProjectData {
     pub comm_channels: Vec<String>,
     pub send_commands: Vec<SendCommand>,
     pub receive_commands: Vec<ReceiveCommand>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub versatap: Option<i32>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub channel_alias: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommSettings {
-    pub params: Vec<i32>, // 9 parameters as integers
+    pub params: Vec<String>, // Parameters as strings to handle mixed types (v7: numbers, v8: port names + numbers)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -104,6 +108,8 @@ pub fn parse_project_file(path: &Path) -> Result<ProjectData, String> {
         comm_channels: vec![],
         send_commands: vec![],
         receive_commands: vec![],
+        versatap: None,
+        channel_alias: vec![],
     };
     
     while idx < lines.len() {
@@ -112,115 +118,121 @@ pub fn parse_project_file(path: &Path) -> Result<ProjectData, String> {
         if line == "VERSION" {
             idx += 1;
             if idx < lines.len() {
-                project.version = lines[idx].trim().parse()
-                    .map_err(|e| format!("Invalid VERSION: {}", e))?;
+                match lines[idx].trim().parse() {
+                    Ok(v) => project.version = v,
+                    Err(e) => eprintln!("Warning: Invalid VERSION: {}, using default", e),
+                }
             }
         } else if line == "COMMSETTINGS" {
+            // Parse COMMSETTINGS with flexible string handling (v7: all numbers, v8: mixed strings/numbers)
             let mut params = vec![];
-            while params.len() < 9 {
+            loop {
                 idx += 1;
                 if idx >= lines.len() {
                     break;
                 }
                 
                 let val_str = lines[idx].trim();
+                
+                // Stop if we hit an empty line or another section header
                 if val_str.is_empty() {
-                    continue;
+                    break;
                 }
                 
-                params.push(val_str.parse()
-                    .map_err(|e| format!("Invalid COMMSETTINGS parameter: {}", e))?);
+                if val_str.starts_with("COMMDISPLAY") || val_str.starts_with("COMMCHANNELS") 
+                    || val_str.starts_with("VERSATAP") || val_str.starts_with("CHANNELALIAS")
+                    || val_str.starts_with("SEND") || val_str.starts_with("RECEIVE") {
+                    idx -= 1; // Back up so we process this header next iteration
+                    break;
+                }
+                
+                // Store as string to handle both numeric and text values
+                params.push(val_str.to_string());
             }
             project.comm_settings = CommSettings { params };
         } else if line == "COMMDISPLAY" {
             idx += 1;
             if idx < lines.len() {
-                project.comm_display = lines[idx].trim().parse()
-                    .map_err(|e| format!("Invalid COMMDISPLAY: {}", e))?;
+                match lines[idx].trim().parse() {
+                    Ok(v) => project.comm_display = v,
+                    Err(e) => eprintln!("Warning: Invalid COMMDISPLAY: {}, using default", e),
+                }
+            }
+        } else if line == "VERSATAP" {
+            idx += 1;
+            if idx < lines.len() {
+                match lines[idx].trim().parse() {
+                    Ok(v) => project.versatap = Some(v),
+                    Err(e) => eprintln!("Warning: Invalid VERSATAP: {}, skipping", e),
+                }
+            }
+        } else if line == "CHANNELALIAS" {
+            idx += 1;
+            while idx < lines.len() {
+                let val_str = lines[idx].trim();
+                
+                // Stop if we hit an empty line or another section header
+                if val_str.is_empty() || val_str.starts_with("SEND") || val_str.starts_with("RECEIVE") 
+                    || val_str.starts_with("VERSION") || val_str.starts_with("COMM") 
+                    || val_str.starts_with("VERSATAP") {
+                    idx -= 1;
+                    break;
+                }
+                
+                project.channel_alias.push(val_str.to_string());
+                idx += 1;
             }
         } else if line == "COMMCHANNELS" {
             idx += 1;
-            while idx < lines.len() && !lines[idx].trim().is_empty() 
-                && !lines[idx].trim().starts_with("SEND") 
-                && !lines[idx].trim().starts_with("RECEIVE") {
-                project.comm_channels.push(lines[idx].trim().to_string());
-                idx += 1;
-            }
-            continue; // Don't increment idx again
-        } else if line == "SEND" {
-            idx += 1;
-            if idx + 4 < lines.len() {
-                let index = lines[idx].trim().parse()
-                    .map_err(|e| format!("Invalid SEND index: {}", e))?;
-                idx += 1;
-                let name = lines[idx].trim().to_string();
-                idx += 1;
-                let hex_data = lines[idx].trim().to_string();
-                idx += 1;
-                let repetition_mode = lines[idx].trim().parse()
-                    .map_err(|e| format!("Invalid SEND repetition_mode: {}", e))?;
-                idx += 1;
-                let color_index = lines[idx].trim().parse()
-                    .map_err(|e| format!("Invalid SEND color_index: {}", e))?;
+            while idx < lines.len() {
+                let val_str = lines[idx].trim();
                 
-                project.send_commands.push(SendCommand {
-                    index,
-                    name,
-                    hex_data,
-                    repetition_mode,
-                    color_index,
-                });
-            }
-        } else if line == "RECEIVE" {
-            idx += 1;
-            if idx + 3 < lines.len() {
-                let index = lines[idx].trim().parse()
-                    .map_err(|e| format!("Invalid RECEIVE index: {}", e))?;
-                idx += 1;
-                let name = lines[idx].trim().to_string();
-                idx += 1;
-                let hex_data = lines[idx].trim().to_string();
-                idx += 1;
-                let param1 = lines[idx].trim().parse().unwrap_or(0);
-                idx += 1;
-                let param2 = lines[idx].trim().parse().unwrap_or(0);
-                idx += 1;
-                
-                // Parse COMMENT line
-                let mut comment = String::new();
-                let mut comment_text = String::new();
-                if idx < lines.len() && lines[idx].trim().starts_with("COMMENT") {
-                    comment = lines[idx].trim().to_string();
-                    // Extract text between quotes if present
-                    if let Some(start) = lines[idx].find('"') {
-                        if let Some(end) = lines[idx][start + 1..].find('"') {
-                            comment_text = lines[idx][start + 1..start + 1 + end].to_string();
-                        }
-                    }
-                    idx += 1;
+                // Stop if we hit an empty line or another section header
+                if val_str.is_empty() || val_str.starts_with("SEND") || val_str.starts_with("RECEIVE")
+                    || val_str.starts_with("VERSION") || val_str.starts_with("COMM") 
+                    || val_str.starts_with("VERSATAP") || val_str.starts_with("CHANNELALIAS") {
+                    idx -= 1;
+                    break;
                 }
                 
-                let param3 = if idx < lines.len() { lines[idx].trim().parse().unwrap_or(0) } else { 0 };
+                project.comm_channels.push(val_str.to_string());
                 idx += 1;
-                let param4 = if idx < lines.len() { lines[idx].trim().parse().unwrap_or(0) } else { 0 };
-                idx += 1;
-                let param5 = if idx < lines.len() { lines[idx].trim().parse().unwrap_or(0) } else { 0 };
-                idx += 1;
-                let param6 = if idx < lines.len() { lines[idx].trim().parse().unwrap_or(0) } else { 0 };
-                
-                project.receive_commands.push(ReceiveCommand {
-                    index,
-                    name,
-                    hex_data,
-                    param1,
-                    param2,
-                    comment,
-                    comment_text,
-                    param3,
-                    param4,
-                    param5,
-                    param6,
-                });
+            }
+        } else if line == "SEND" {
+            // Parse SEND command with error isolation
+            idx += 1;
+            if idx + 4 < lines.len() {
+                match parse_send_command(&lines, &mut idx) {
+                    Ok(cmd) => project.send_commands.push(cmd),
+                    Err(e) => {
+                        eprintln!("Warning: Failed to parse SEND command: {}, skipping", e);
+                        // Skip to next section
+                        while idx < lines.len() && !lines[idx].trim().is_empty() 
+                            && !lines[idx].trim().starts_with("SEND") 
+                            && !lines[idx].trim().starts_with("RECEIVE") {
+                            idx += 1;
+                        }
+                        continue;
+                    }
+                }
+            }
+        } else if line == "RECEIVE" {
+            // Parse RECEIVE command with error isolation
+            idx += 1;
+            if idx + 3 < lines.len() {
+                match parse_receive_command(&lines, &mut idx) {
+                    Ok(cmd) => project.receive_commands.push(cmd),
+                    Err(e) => {
+                        eprintln!("Warning: Failed to parse RECEIVE command: {}, skipping", e);
+                        // Skip to next section
+                        while idx < lines.len() && !lines[idx].trim().is_empty() 
+                            && !lines[idx].trim().starts_with("SEND") 
+                            && !lines[idx].trim().starts_with("RECEIVE") {
+                            idx += 1;
+                        }
+                        continue;
+                    }
+                }
             }
         }
         
@@ -228,6 +240,81 @@ pub fn parse_project_file(path: &Path) -> Result<ProjectData, String> {
     }
     
     Ok(project)
+}
+
+// Helper function to parse a SEND command
+fn parse_send_command(lines: &[&str], idx: &mut usize) -> Result<SendCommand, String> {
+    let index = lines[*idx].trim().parse()
+        .map_err(|e| format!("Invalid SEND index: {}", e))?;
+    *idx += 1;
+    let name = lines[*idx].trim().to_string();
+    *idx += 1;
+    let hex_data = lines[*idx].trim().to_string();
+    *idx += 1;
+    let repetition_mode = lines[*idx].trim().parse()
+        .map_err(|e| format!("Invalid SEND repetition_mode: {}", e))?;
+    *idx += 1;
+    let color_index = lines[*idx].trim().parse()
+        .map_err(|e| format!("Invalid SEND color_index: {}", e))?;
+    
+    Ok(SendCommand {
+        index,
+        name,
+        hex_data,
+        repetition_mode,
+        color_index,
+    })
+}
+
+// Helper function to parse a RECEIVE command
+fn parse_receive_command(lines: &[&str], idx: &mut usize) -> Result<ReceiveCommand, String> {
+    let index = lines[*idx].trim().parse()
+        .map_err(|e| format!("Invalid RECEIVE index: {}", e))?;
+    *idx += 1;
+    let name = lines[*idx].trim().to_string();
+    *idx += 1;
+    let hex_data = lines[*idx].trim().to_string();
+    *idx += 1;
+    let param1 = lines[*idx].trim().parse().unwrap_or(0);
+    *idx += 1;
+    let param2 = lines[*idx].trim().parse().unwrap_or(0);
+    *idx += 1;
+    
+    // Parse COMMENT line
+    let mut comment = String::new();
+    let mut comment_text = String::new();
+    if *idx < lines.len() && lines[*idx].trim().starts_with("COMMENT") {
+        comment = lines[*idx].trim().to_string();
+        // Extract text between quotes if present
+        if let Some(start) = lines[*idx].find('"') {
+            if let Some(end) = lines[*idx][start + 1..].find('"') {
+                comment_text = lines[*idx][start + 1..start + 1 + end].to_string();
+            }
+        }
+        *idx += 1;
+    }
+    
+    let param3 = if *idx < lines.len() { lines[*idx].trim().parse().unwrap_or(0) } else { 0 };
+    *idx += 1;
+    let param4 = if *idx < lines.len() { lines[*idx].trim().parse().unwrap_or(0) } else { 0 };
+    *idx += 1;
+    let param5 = if *idx < lines.len() { lines[*idx].trim().parse().unwrap_or(0) } else { 0 };
+    *idx += 1;
+    let param6 = if *idx < lines.len() { lines[*idx].trim().parse().unwrap_or(0) } else { 0 };
+    
+    Ok(ReceiveCommand {
+        index,
+        name,
+        hex_data,
+        param1,
+        param2,
+        comment,
+        comment_text,
+        param3,
+        param4,
+        param5,
+        param6,
+    })
 }
 
 // ============================================================================
@@ -242,7 +329,7 @@ pub fn write_project_file(project: &ProjectData, path: &Path) -> Result<(), Stri
     output.push_str(&format!("{}\r\n", project.version));
     output.push_str("\r\n");
     
-    // COMMSETTINGS
+    // COMMSETTINGS (now stored as strings)
     output.push_str("COMMSETTINGS\r\n");
     for param in &project.comm_settings.params {
         output.push_str(&format!("{}\r\n", param));
@@ -253,6 +340,31 @@ pub fn write_project_file(project: &ProjectData, path: &Path) -> Result<(), Stri
     output.push_str("COMMDISPLAY\r\n");
     output.push_str(&format!("{}\r\n", project.comm_display));
     output.push_str("\r\n");
+    
+    // VERSATAP (optional, v8+)
+    if let Some(versatap) = project.versatap {
+        output.push_str("VERSATAP\r\n");
+        output.push_str(&format!("{}\r\n", versatap));
+        output.push_str("\r\n");
+    }
+    
+    // CHANNELALIAS (optional, v8+)
+    if !project.channel_alias.is_empty() {
+        output.push_str("CHANNELALIAS\r\n");
+        for alias in &project.channel_alias {
+            output.push_str(&format!("{}\r\n", alias));
+        }
+        output.push_str("\r\n");
+    }
+    
+    // COMMCHANNELS (if present)
+    if !project.comm_channels.is_empty() {
+        output.push_str("COMMCHANNELS\r\n");
+        for channel in &project.comm_channels {
+            output.push_str(&format!("{}\r\n", channel));
+        }
+        output.push_str("\r\n");
+    }
     
     // SEND commands
     for cmd in &project.send_commands {
@@ -452,7 +564,7 @@ mod tests {
     use tempfile::NamedTempFile;
 
     #[test]
-    fn test_parse_project_file() {
+    fn test_parse_project_file_v7() {
         let content = "VERSION
 7
 
@@ -498,9 +610,69 @@ Pong
         let project = result.unwrap();
         assert_eq!(project.version, 7);
         assert_eq!(project.comm_settings.params.len(), 9);
-        assert_eq!(project.comm_settings.params[0], 0);
-        assert_eq!(project.comm_settings.params[3], 9600);
+        assert_eq!(project.comm_settings.params[0], "0");
+        assert_eq!(project.comm_settings.params[3], "9600");
         assert_eq!(project.comm_channels.len(), 2);
         assert_eq!(project.send_commands.len(), 2);
+    }
+
+    #[test]
+    fn test_parse_project_file_v8() {
+        let content = "VERSION
+8
+
+COMMSETTINGS
+0
+COM3
+COM2
+57600
+2
+63
+4
+0
+0
+
+COMMDISPLAY
+0
+
+VERSATAP
+0
+
+CHANNELALIAS
+
+
+
+SEND
+0
+-----------------------
+2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D 2D
+0
+5
+
+SEND
+1
+ATM Sof Reset
+24 30 31 2C 30 37 2C 30 30 30 31 2C 2C 2C 65 37 37 62 2A
+0
+5
+";
+        
+        let mut file = NamedTempFile::new().unwrap();
+        write!(file, "{}", content).unwrap();
+        
+        let result = parse_project_file(file.path());
+        assert!(result.is_ok());
+        
+        let project = result.unwrap();
+        assert_eq!(project.version, 8);
+        assert_eq!(project.comm_settings.params.len(), 9);
+        assert_eq!(project.comm_settings.params[0], "0");
+        assert_eq!(project.comm_settings.params[1], "COM3");
+        assert_eq!(project.comm_settings.params[2], "COM2");
+        assert_eq!(project.comm_settings.params[3], "57600");
+        assert_eq!(project.versatap, Some(0));
+        assert_eq!(project.send_commands.len(), 2);
+        assert_eq!(project.send_commands[0].name, "-----------------------");
+        assert_eq!(project.send_commands[1].name, "ATM Sof Reset");
     }
 }

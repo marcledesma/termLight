@@ -45,7 +45,7 @@ export interface Project {
   commands: Command[];
   receiveCommands: ReceiveCommand[];
   version: number;
-  commSettings: number[];
+  commSettings: (number | string)[]; // Can be numbers (v7) or mixed (v8)
   commDisplay: number;
   commChannels: string[];
 }

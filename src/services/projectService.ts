@@ -38,7 +38,7 @@ import { SerialConfig } from '../types/serial';
 interface ProjectData {
   version: number;
   comm_settings: {
-    params: number[];
+    params: string[]; // Changed to string[] to handle mixed types (v7: numbers, v8: port names + numbers)
   };
   comm_display: number;
   comm_channels: string[];
@@ -62,6 +62,8 @@ interface ProjectData {
     param5: number;
     param6: number;
   }[];
+  versatap?: number; // v8+ optional field
+  channel_alias?: string[]; // v8+ optional field
 }
 
 /**
@@ -170,7 +172,7 @@ export const projectService = {
     return {
       version: project.version || 0,
       comm_settings: {
-        params: project.commSettings || [],
+        params: (project.commSettings || []).map(s => String(s)), // Ensure all params are strings
       },
       comm_display: project.commDisplay || 0,
       comm_channels: project.commChannels || [],
@@ -236,6 +238,16 @@ export const projectService = {
       data.comm_settings.params
     );
 
+    // Convert params: try to parse as numbers where possible (for backward compatibility with v7)
+    const commSettings: (number | string)[] = data.comm_settings.params.map(param => {
+      const numValue = parseInt(param, 10);
+      // Keep as string if it's not a pure number or if it looks like a port name
+      if (isNaN(numValue) || param.toUpperCase().startsWith('COM') || param.includes(':')) {
+        return param;
+      }
+      return numValue;
+    });
+
     return {
       metadata: {
         name: projectName,
@@ -246,7 +258,7 @@ export const projectService = {
       commands,
       receiveCommands,
       version: data.version,
-      commSettings: data.comm_settings.params,
+      commSettings,
       commDisplay: data.comm_display,
       commChannels: data.comm_channels,
     };
@@ -254,11 +266,27 @@ export const projectService = {
 
   /**
    * Parse serial config from COMMSETTINGS parameters
-   * Format: [?, ?, ?, baudRate, ?, ?, ?, ?, ?]
+   * Handles both v7 (all numeric) and v8 (mixed string/numeric) formats
+   * Common baud rates: 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600
    */
-  parseSerialConfig: (params: number[]): SerialConfig => {
-    const baudRate = params.length > 3 ? params[3] : 9600;
-
+  parseSerialConfig: (params: string[]): SerialConfig => {
+    let baudRate = 9600; // Default
+    
+    // Search for a valid baud rate in the params array
+    const commonBaudRates = [
+      300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 
+      28800, 31250, 38400, 56000, 57600, 115200, 
+      128000, 230400, 256000, 460800, 921600
+    ];
+    
+    for (const param of params) {
+      const numValue = parseInt(param, 10);
+      if (!isNaN(numValue) && commonBaudRates.includes(numValue)) {
+        baudRate = numValue;
+        break;
+      }
+    }
+    
     return {
       portName: '',
       baudRate,

@@ -111,17 +111,24 @@ class UpdateService {
     this.isDownloading = true;
 
     try {
+      let downloaded = 0;
+      let totalSize = 0;
+
       // Download and install the update
       await update.downloadAndInstall((event) => {
         switch (event.event) {
           case 'Started':
             console.log('Update download started');
+            totalSize = event.data.contentLength || 0;
             onProgress?.(0);
             break;
           case 'Progress':
-            const progress = Math.round((event.data.downloaded / event.data.contentLength!) * 100);
-            console.log(`Download progress: ${progress}%`);
-            onProgress?.(progress);
+            downloaded += event.data.chunkLength;
+            if (totalSize > 0) {
+              const progress = Math.round((downloaded / totalSize) * 100);
+              console.log(`Download progress: ${progress}%`);
+              onProgress?.(progress);
+            }
             break;
           case 'Finished':
             console.log('Update download finished');

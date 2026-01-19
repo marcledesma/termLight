@@ -1,7 +1,7 @@
 {
   "name": "termlight",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "A serial communication tool for sending, receiving, and managing commands via COM ports",
   "author": "Marc Ledesma",

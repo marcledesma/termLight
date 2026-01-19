@@ -1,7 +1,7 @@
 # termLight - Serial Command Manager
 
 ![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg)
-![Version](https://img.shields.io/badge/version-0.1.1-green.svg)
+![Version](https://img.shields.io/badge/version-0.1.2-green.svg)
 
 A serial communication tool for sending, receiving, and managing commands via COM ports. It offers functionality similar to Docklight™ with Arduino™-style direct command execution and includes support for Docklight project files (`.ptp`).
 

@@ -30,7 +30,7 @@
  * @date 2026-01-19
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Download, AlertCircle } from 'lucide-react';
 import { Button } from '../Common/Button';
 import { useStore } from '../../store';
@@ -45,14 +45,20 @@ export function UpdateModal() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const hasChecked = useRef(false);
 
   useEffect(() => {
+    // Prevent double-checking in React Strict Mode (dev only)
+    if (hasChecked.current) return;
+    hasChecked.current = true;
+    
     checkForUpdate();
   }, []);
 
   const checkForUpdate = async () => {
     setIsChecking(true);
     setError(null);
+    hasChecked.current = true;
 
     try {
       // Get update info

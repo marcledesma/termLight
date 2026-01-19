@@ -29,7 +29,8 @@
  * @date 2025-11-19
  */
 
-import { Send, X } from 'lucide-react';
+import { Send, X, GripVertical } from 'lucide-react';
+import { Draggable } from '@hello-pangea/dnd';
 import { Command } from '../../types';
 import { Button } from '../Common/Button';
 import { useStore } from '../../store';
@@ -37,9 +38,11 @@ import { commandService } from '../../services/commandService';
 
 interface CommandItemProps {
   command: Command;
+  index: number;
+  isDragDisabled: boolean;
 }
 
-export function CommandItem({ command }: CommandItemProps) {
+export function CommandItem({ command, index, isDragDisabled }: CommandItemProps) {
   const { setSelectedCommand, sendSerialData, appendLog, isConnected, setActiveModal, setEditingCommandId, setCommandToDeleteId, commandColumnWidths } = useStore();
 
   const handleSend = async (e: React.MouseEvent) => {
@@ -75,57 +78,77 @@ export function CommandItem({ command }: CommandItemProps) {
   };
 
   return (
-    <div
-      className="flex p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer text-xs relative group text-gray-900 dark:text-gray-100"
-      onClick={() => setSelectedCommand(command)}
-      onDoubleClick={handleDoubleClick}
-    >
-      <div 
-        className="flex items-center justify-center"
-        style={{ width: `${commandColumnWidths.send}px` }}
-        onDoubleClick={(e) => e.stopPropagation()}
-      >
-        <Button 
-          variant="icon" 
-          size="sm" 
-          className="h-7 w-full text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-          onClick={handleSend}
-          disabled={!isConnected}
-          title="Send Command"
+    <Draggable draggableId={command.id} index={index} isDragDisabled={isDragDisabled}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className={`flex p-2 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer text-xs relative group text-gray-900 dark:text-gray-100 ${
+            snapshot.isDragging ? 'bg-blue-50 dark:bg-blue-900 shadow-lg' : ''
+          }`}
+          onClick={() => setSelectedCommand(command)}
+          onDoubleClick={handleDoubleClick}
         >
-          <Send size={14} />
-        </Button>
-      </div>
-      
-      <div 
-        className="px-2 py-1 bg-transparent truncate select-none overflow-hidden flex items-center"
-        style={{ width: `${commandColumnWidths.name}px` }}
-        title={command.name}
-      >
-        {command.name}
-      </div>
-      
-      <div 
-        className="px-2 py-1 bg-transparent font-mono truncate select-none text-gray-600 dark:text-gray-400 overflow-hidden flex items-center flex-1"
-        title={command.sequence}
-      >
-        {command.sequence}
-      </div>
+          {/* Drag Handle */}
+          {!isDragDisabled && (
+            <div 
+              {...provided.dragHandleProps}
+              className="flex items-center justify-center px-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              onClick={(e) => e.stopPropagation()}
+              onDoubleClick={(e) => e.stopPropagation()}
+            >
+              <GripVertical size={16} />
+            </div>
+          )}
+          
+          <div 
+            className="flex items-center justify-center"
+            style={{ width: `${commandColumnWidths.send}px` }}
+            onDoubleClick={(e) => e.stopPropagation()}
+          >
+            <Button 
+              variant="icon" 
+              size="sm" 
+              className="h-7 w-full text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+              onClick={handleSend}
+              disabled={!isConnected}
+              title="Send Command"
+            >
+              <Send size={14} />
+            </Button>
+          </div>
+          
+          <div 
+            className="px-2 py-1 bg-transparent truncate select-none overflow-hidden flex items-center"
+            style={{ width: `${commandColumnWidths.name}px` }}
+            title={command.name}
+          >
+            {command.name}
+          </div>
+          
+          <div 
+            className="px-2 py-1 bg-transparent font-mono truncate select-none text-gray-600 dark:text-gray-400 overflow-hidden flex items-center flex-1"
+            title={command.sequence}
+          >
+            {command.sequence}
+          </div>
 
-      <div 
-        className="flex items-center justify-center"
-        style={{ width: `${commandColumnWidths.delete}px` }}
-      >
-        <Button
-          variant="icon"
-          size="sm"
-          className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-0"
-          onClick={handleDelete}
-          title="Delete Command"
-        >
-          <X size={20} />
-        </Button>
-      </div>
-    </div>
+          <div 
+            className="flex items-center justify-center"
+            style={{ width: `${commandColumnWidths.delete}px` }}
+          >
+            <Button
+              variant="icon"
+              size="sm"
+              className="h-7 w-full text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity p-0"
+              onClick={handleDelete}
+              title="Delete Command"
+            >
+              <X size={20} />
+            </Button>
+          </div>
+        </div>
+      )}
+    </Draggable>
   );
 }

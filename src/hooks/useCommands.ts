@@ -50,6 +50,7 @@ export function useCommands() {
     setSelectedCommand,
     setSortBy,
     setSearchQuery,
+    reorderCommands,
   } = useStore();
 
   // Filter commands based on search query
@@ -72,8 +73,18 @@ export function useCommands() {
     if (sortBy === 'alphabetical') {
       sorted.sort((a, b) => a.name.localeCompare(b.name));
     } else {
-      // Sort by date (newest first)
-      sorted.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      // Sort by date: prioritize manual order field, then fall back to creation date
+      sorted.sort((a, b) => {
+        // If both have order values, use those
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        // If only one has an order value, it comes first
+        if (a.order !== undefined) return -1;
+        if (b.order !== undefined) return 1;
+        // Otherwise, sort by date (newest first)
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      });
     }
     
     return sorted;
@@ -95,6 +106,12 @@ export function useCommands() {
     }
 
     const formattedSequence = commandService.formatHexSequence(sequence);
+    
+    // Calculate the next order value (highest order + 1)
+    const maxOrder = commands.reduce((max, cmd) => {
+      return cmd.order !== undefined && cmd.order > max ? cmd.order : max;
+    }, -1);
+    
     const command = commandService.createCommand(
       name,
       formattedSequence,
@@ -105,8 +122,14 @@ export function useCommands() {
       lineEnding
     );
     
-    addCommand(command);
-    return command;
+    // Add order field to the new command
+    const commandWithOrder = {
+      ...command,
+      order: maxOrder + 1,
+    };
+    
+    addCommand(commandWithOrder);
+    return commandWithOrder;
   };
 
   // Update an existing command
@@ -148,6 +171,7 @@ export function useCommands() {
     selectCommand: setSelectedCommand,
     setSortBy,
     setSearchQuery,
+    reorderCommands,
     parseHexSequence: commandService.parseHexSequence,
     bytesToHexSequence: commandService.bytesToHexSequence,
   };

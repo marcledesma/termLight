@@ -45,6 +45,7 @@ export interface CommandSlice {
   addCommand: (command: Command) => void;
   updateCommand: (id: string, updates: Partial<Command>) => void;
   deleteCommand: (id: string) => void;
+  reorderCommands: (sourceIndex: number, destinationIndex: number) => void;
 }
 
 export const createCommandSlice: StateCreator<
@@ -80,6 +81,25 @@ export const createCommandSlice: StateCreator<
     set((state) => ({
       commands: state.commands.filter((cmd) => cmd.id !== id),
     }));
+    const state = get();
+    if (state.setIsDirty) {
+      state.setIsDirty(true);
+    }
+  },
+  reorderCommands: (sourceIndex, destinationIndex) => {
+    set((state) => {
+      const reordered = Array.from(state.commands);
+      const [removed] = reordered.splice(sourceIndex, 1);
+      reordered.splice(destinationIndex, 0, removed);
+      
+      // Update order field for all commands based on new position
+      const updatedCommands = reordered.map((cmd, index) => ({
+        ...cmd,
+        order: index,
+      }));
+      
+      return { commands: updatedCommands };
+    });
     const state = get();
     if (state.setIsDirty) {
       state.setIsDirty(true);

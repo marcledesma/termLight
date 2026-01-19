@@ -43,6 +43,8 @@ export interface Command {
   // Optional metadata to preserve user preference for display
   inputFormat?: InputFormat;
   lineEnding?: LineEnding;
+  // Optional order field for manual command reordering
+  order?: number;
 }
 
 export type CommandSort = 'date' | 'alphabetical';

@@ -32,13 +32,14 @@
 
 import { GripVertical } from 'lucide-react';
 import { useRef } from 'react';
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { CommandHeader } from './CommandHeader';
 import { CommandItem } from './CommandItem';
 import { useCommands } from '../../hooks/useCommands';
 import { useStore } from '../../store';
 
 export function CommandPanel() {
-  const { commands, searchQuery } = useCommands();
+  const { commands, searchQuery, sortBy, reorderCommands } = useCommands();
   const { commandPanelWidth, setCommandPanelWidth } = useStore();
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
@@ -63,6 +64,13 @@ export function CommandPanel() {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    if (result.source.index === result.destination.index) return;
+    
+    reorderCommands(result.source.index, result.destination.index);
+  };
+
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-l border-gray-300 dark:border-gray-700 relative">
       <div
@@ -72,17 +80,35 @@ export function CommandPanel() {
         <GripVertical size={12} className="text-gray-400 group-hover:text-blue-500 opacity-0 group-hover:opacity-100" />
       </div>
       <CommandHeader />
-      <div className="flex-1 overflow-y-auto">
-        {commands.length > 0 ? (
-          commands.map((command) => (
-            <CommandItem key={command.id} command={command} />
-          ))
-        ) : (
-          <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-            {searchQuery ? 'No commands found' : 'No commands yet'}
-          </div>
-        )}
-      </div>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="commands" isDropDisabled={sortBy !== 'date'}>
+          {(provided) => (
+            <div 
+              className="flex-1 overflow-y-auto"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {commands.length > 0 ? (
+                <>
+                  {commands.map((command, index) => (
+                    <CommandItem 
+                      key={command.id} 
+                      command={command} 
+                      index={index}
+                      isDragDisabled={sortBy !== 'date'}
+                    />
+                  ))}
+                  {provided.placeholder}
+                </>
+              ) : (
+                <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+                  {searchQuery ? 'No commands found' : 'No commands yet'}
+                </div>
+              )}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   );
 }

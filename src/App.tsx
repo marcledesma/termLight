@@ -45,8 +45,10 @@ import { AboutModal } from './components/Modals/AboutModal';
 import { TutorialModal } from './components/Modals/TutorialModal';
 import { CommandModal } from './components/Modals/CommandModal';
 import { DeleteCommandModal } from './components/Modals/DeleteCommandModal';
+import { UpdateModal } from './components/Modals/UpdateModal';
 import { useStore } from './store';
 import { serialService } from './services/serialService';
+import { useUpdateCheck } from './hooks/useUpdateCheck';
 
 function App() {
   const activeModal = useStore((state) => state.activeModal);
@@ -56,6 +58,9 @@ function App() {
   const appendLog = useStore((state) => state.appendLog);
   const theme = useStore((state) => state.theme);
   const commandPanelWidth = useStore((state) => state.commandPanelWidth);
+
+  // Check for updates on startup
+  useUpdateCheck();
 
   useEffect(() => {
     const handleUnload = () => {
@@ -121,6 +126,7 @@ function App() {
         {activeModal === 'tutorial' && <TutorialModal />}
         {activeModal === 'command' && <CommandModal editingCommandId={editingCommandId} />}
         {activeModal === 'deleteCommand' && <DeleteCommandModal />}
+        {activeModal === 'update' && <UpdateModal />}
       </div>
     </div>
   );

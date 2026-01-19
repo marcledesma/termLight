@@ -33,7 +33,7 @@
 import { StateCreator } from 'zustand';
 import { DataFormat, InputFormat, LineEnding, Theme, FontSize, DisplayColors, CrcType } from '../../types';
 
-export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | 'command' | 'deleteCommand' | null;
+export type ModalType = 'commSettings' | 'config' | 'about' | 'tutorial' | 'command' | 'deleteCommand' | 'update' | null;
 
 export interface LogEntry {
   timestamp: number;

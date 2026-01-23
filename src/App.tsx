@@ -102,7 +102,7 @@ function App() {
 
   return (
     <div className={clsx("flex flex-col h-screen", { "dark": theme === "Dark" })}>
-      <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
+      <div className="flex flex-col h-full bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 border-x border-b border-gray-300 dark:border-gray-700">
         <TitleBar />
         <MenuBar />
         <Toolbar />
